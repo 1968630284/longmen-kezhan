@@ -1,0 +1,525 @@
+<Window xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="龙门客栈" Width="620" Height="740" MinWidth="520" MinHeight="560"
+        WindowStyle="None" ResizeMode="CanResize" ShowInTaskbar="True"
+        WindowStartupLocation="CenterScreen" Background="Transparent"
+        FontFamily="Microsoft YaHei UI, Segoe UI" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+  <shell:WindowChrome.WindowChrome>
+    <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6" CornerRadius="12" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+  </shell:WindowChrome.WindowChrome>
+  <Window.Resources>
+    <sys:Double x:Key="FsCaption">10.5</sys:Double>
+    <sys:Double x:Key="FsMeta">11.5</sys:Double>
+    <sys:Double x:Key="FsBody">13</sys:Double>
+    <sys:Double x:Key="FsTitle">14.5</sys:Double>
+    <sys:String x:Key="FwSemiBold">SemiBold</sys:String>
+    <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="LineBrush" Color="#DCE4EE"/>
+    <SolidColorBrush x:Key="ThumbBrush" Color="#33000000"/>
+    <Style x:Key="WinBtn" TargetType="Button">
+      <Setter Property="Width" Value="44"/>
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Foreground" Value="#3D4E63"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#14000000"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#26000000"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="CloseBtn" TargetType="Button" BasedOn="{StaticResource WinBtn}">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd" Background="Transparent" CornerRadius="6">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#E81123"/>
+                <Setter Property="Foreground" Value="White"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style TargetType="ScrollBar">
+      <Setter Property="Width" Value="8"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ScrollBar">
+            <Grid Background="Transparent">
+              <Track x:Name="PART_Track" IsDirectionReversed="True">
+                <Track.DecreaseRepeatButton>
+                  <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" Focusable="False"/>
+                </Track.DecreaseRepeatButton>
+                <Track.Thumb>
+                  <Thumb>
+                    <Thumb.Template>
+                      <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="tb" CornerRadius="4" Background="{DynamicResource ThumbBrush}" Opacity="0.45" Margin="1,0"/>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="tb" Property="Opacity" Value="1"/>
+                          </Trigger>
+                          <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="tb" Property="Opacity" Value="1"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Thumb.Template>
+                  </Thumb>
+                </Track.Thumb>
+                <Track.IncreaseRepeatButton>
+                  <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" Focusable="False"/>
+                </Track.IncreaseRepeatButton>
+              </Track>
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  <Style x:Key="UtilBtn" TargetType="Button">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#3D4E63"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="14" Padding="11,5">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#1A000000"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#2A000000"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  <Style x:Key="IcoBtn" TargetType="Button">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets"/>
+      <Setter Property="FontSize" Value="17"/>
+      <Setter Property="Foreground" Value="#5A6E85"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="9">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#E9F0F8"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#DCE7F3"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+  <Border x:Name="RootBorder" CornerRadius="12" Background="#F2F7FB" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="52"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="44"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+<Grid x:Name="Header" Grid.Row="0" Grid.Column="1" Margin="8,0,0,0" Background="Transparent">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock x:Name="TitleText" Text="龙门客栈" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="#16283C" VerticalAlignment="Center"/>
+          <Border x:Name="LiveBadge" CornerRadius="9" Background="#1A35C759" BorderBrush="#4D35C759" BorderThickness="1" Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+              <Ellipse x:Name="LiveDot" Width="6" Height="6" Fill="#35C759" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <Ellipse.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Ellipse.RenderTransform>
+              </Ellipse>
+              <TextBlock x:Name="LiveBadgeText" Text="营业中" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#1E9E4A" Margin="4,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Border>
+          <TextBlock x:Name="StatusText" Text="" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#7A8CA3" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
+        <Border x:Name="SearchBorder" Grid.Column="1" Width="0" CornerRadius="13" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
+          <Grid>
+            <TextBox x:Name="SearchBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="#16283C" Padding="10,4" VerticalContentAlignment="Center"/>
+            <TextBlock x:Name="SearchHint" Text="搜索历史…" FontSize="{StaticResource FsMeta}" Foreground="#9FB0C3" Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+          </Grid>
+        </Border>
+        <Button x:Name="SearchBtn" Grid.Column="2" Style="{StaticResource IcoBtn}" Content="&#xE721;" FontSize="{StaticResource FsTitle}" Width="32" Height="32" Margin="0,0,4,0" ToolTip="搜索历史"/>
+        <Button x:Name="BtnMin" Grid.Column="3" Style="{StaticResource WinBtn}" VerticalAlignment="Center" Margin="0,0,2,0" ToolTip="最小化">
+          <Path Data="M 0,5 L 10,5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+        </Button>
+        <Button x:Name="BtnMax" Grid.Column="4" Style="{StaticResource WinBtn}" VerticalAlignment="Center" Margin="0,0,2,0" ToolTip="放大 / 还原">
+          <Path Data="M 1,1 L 9,1 L 9,9 L 1,9 Z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2" Fill="Transparent"/>
+        </Button>
+        <Button x:Name="BtnClose" Grid.Column="5" Style="{StaticResource CloseBtn}" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="关闭">
+          <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+        </Button>
+        <Border x:Name="HeaderLine" Grid.ColumnSpan="6" VerticalAlignment="Bottom" Height="1" Background="#E1E9F1"/>
+      </Grid>
+      <Grid x:Name="Rail" Grid.Column="0" Grid.RowSpan="3" Background="Transparent">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Width="34" Height="34" CornerRadius="17" Background="Transparent" Margin="0,6,0,6" HorizontalAlignment="Center">
+          <Border.Clip>
+            <EllipseGeometry Center="17,17" RadiusX="17" RadiusY="17"/>
+          </Border.Clip>
+          <Image x:Name="AvatarImg" Stretch="UniformToFill" Width="34" Height="34"/>
+        </Border>
+        <StackPanel Grid.Row="1">
+          <Button x:Name="BtnChat" Style="{StaticResource IcoBtn}" Content="&#xE8BD;" ToolTip="聊天" Margin="0,2" HorizontalAlignment="Center"/>
+          <Button x:Name="StudioBtn" Style="{StaticResource IcoBtn}" Content="&#xE714;" ToolTip="视频工坊" Margin="0,2" HorizontalAlignment="Center"/>
+          <Button x:Name="OutBtn" Style="{StaticResource IcoBtn}" Content="&#xE768;" ToolTip="成品（查看 / 删除）" Margin="0,2" HorizontalAlignment="Center"/>
+          <Grid Width="36" Height="36" Margin="0,2" HorizontalAlignment="Center">
+            <Button x:Name="CollabBtn" Style="{StaticResource IcoBtn}" Content="&#xE716;" ToolTip="传菜口（留言板 / 日志 / 占用）"/>
+            <Ellipse x:Name="CollabDot" Width="8" Height="8" Fill="#E5484D" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" Visibility="Collapsed"/>
+          </Grid>
+          <Button x:Name="ArchiveBtn" Style="{StaticResource IcoBtn}" Content="&#xE74E;" ToolTip="存档（打包状态日志与记忆）" Margin="0,2" HorizontalAlignment="Center"/>
+          <Button x:Name="ArchiveUndoBtn" Style="{StaticResource IcoBtn}" Content="&#xE7A7;" ToolTip="撤销最近一次存档（10 分钟内有效）" Margin="0,2" HorizontalAlignment="Center"/>
+          <Button x:Name="BootCopyBtn" Style="{StaticResource IcoBtn}" Content="&#xE8C8;" ToolTip="复制开局语（带最新包路径）" Margin="0,2" HorizontalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Margin="0,0,0,8">
+          <Button x:Name="ShotBtn" Style="{StaticResource IcoBtn}" Content="&#xE722;" ToolTip="给大厨看屏幕" Margin="0,2" HorizontalAlignment="Center"/>
+          <Button x:Name="DarkBtn" Style="{StaticResource IcoBtn}" Content="&#xE706;" ToolTip="深浅色" Margin="0,2" HorizontalAlignment="Center"/>
+        </StackPanel>
+        <Border x:Name="RailLine" HorizontalAlignment="Right" Width="1" Background="{DynamicResource LineBrush}"/>
+      </Grid>
+      <ScrollViewer x:Name="FeedScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="6,6,2,6">
+        <StackPanel x:Name="FeedList"/>
+      </ScrollViewer>
+      <Border x:Name="InputBar" Grid.Row="2" Grid.Column="1" BorderBrush="#E1E9F1" BorderThickness="0,1,0,0" Padding="14,12,14,14">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <Border x:Name="InputBorder" Grid.Column="0" CornerRadius="20" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,10,0">
+            <Grid>
+              <TextBox x:Name="InputBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsTitle}" Foreground="#16283C"
+                       Padding="13,9" VerticalContentAlignment="Center" MaxLength="500"/>
+              <TextBlock x:Name="InputHint" Text="跟掌柜说句话…" FontSize="{StaticResource FsTitle}" Foreground="#9FB0C3" Margin="14,0,0,0"
+                         VerticalAlignment="Center" IsHitTestVisible="False"/>
+            </Grid>
+          </Border>
+          <Button x:Name="SendBtn" Grid.Column="1" Width="42" Height="42" Cursor="Hand" ToolTip="发给掌柜" VerticalAlignment="Center">
+            <Button.Template>
+              <ControlTemplate TargetType="Button">
+                <Border x:Name="bd" Background="#2F7DE1" CornerRadius="21" BorderBrush="#66FFFFFF" BorderThickness="1">
+                  <TextBlock Text="↑" FontSize="{StaticResource FsTitle}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="bd" Property="Background" Value="#4A90E8"/>
+                  </Trigger>
+                  <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="bd" Property="Background" Value="#2569BC"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
+              </ControlTemplate>
+            </Button.Template>
+          </Button>
+        </Grid>
+      </Border>
+
+      <Grid x:Name="StudioView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Visibility="Collapsed">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="6,4,2,4">
+          <StackPanel Margin="10,4,10,6">
+            <Border x:Name="FlowBar" CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Padding="10,8" Margin="0,0,0,12">
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Ellipse x:Name="FlowDotChar" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
+                <TextBlock Text="人物" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#1565C0" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="→" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <Ellipse x:Name="FlowDotScene" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
+                <TextBlock Text="场景" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#7B1FA2" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="←" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <Ellipse x:Name="FlowDotBg" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
+                <TextBlock Text="背景" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#2E7D32" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="·" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <Ellipse x:Name="FlowDotPrompt" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
+                <TextBlock Text="提示词" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#C25E10" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="→" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <TextBlock Text="生成" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#2F7DE1" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Border>
+            <Border x:Name="NodeChar" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+              <Border.Effect>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
+              </Border.Effect>
+              <Grid>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="30"/>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="BarChar" Grid.Row="0" Background="#DCEBFB" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarCharT" Text="人物 · 图片" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#1565C0" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                </Border>
+                <Grid Grid.Row="1" Margin="10,8,10,10">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+                  <Border x:Name="DropChar" Grid.Row="0" Height="118" CornerRadius="10" Background="#F7FAFD" BorderBrush="#C3D2E2" BorderThickness="1" AllowDrop="True" Tag="char" Cursor="Hand">
+                    <Grid>
+                      <Rectangle x:Name="DashChar" Margin="4" RadiusX="7" RadiusY="7" Stroke="#B9CBDE" StrokeThickness="1.1" StrokeDashArray="4,3"/>
+                      <TextBlock x:Name="HintChar" Text="把人物图片拖到这里，或点击选择" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <Image x:Name="ImgChar" Stretch="Uniform" Margin="2" Visibility="Collapsed" AllowDrop="True" Tag="char"/>
+                    </Grid>
+                  </Border>
+                  <TextBlock x:Name="NameChar" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+              </Grid>
+            </Border>
+            <Border x:Name="NodeBg" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+              <Border.Effect>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
+              </Border.Effect>
+              <Grid>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="30"/>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="BarBg" Grid.Row="0" Background="#DFF2E2" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarBgT" Text="背景 · 图片" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#2E7D32" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                </Border>
+                <Grid Grid.Row="1" Margin="10,8,10,10">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+                  <Border x:Name="DropBg" Grid.Row="0" Height="118" CornerRadius="10" Background="#F7FAFD" BorderBrush="#C3D2E2" BorderThickness="1" AllowDrop="True" Tag="bg" Cursor="Hand">
+                    <Grid>
+                      <Rectangle x:Name="DashBg" Margin="4" RadiusX="7" RadiusY="7" Stroke="#B9CBDE" StrokeThickness="1.1" StrokeDashArray="4,3"/>
+                      <TextBlock x:Name="HintBg" Text="把背景图片拖到这里，或点击选择" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <Image x:Name="ImgBg" Stretch="Uniform" Margin="2" Visibility="Collapsed" AllowDrop="True" Tag="bg"/>
+                    </Grid>
+                  </Border>
+                  <TextBlock x:Name="NameBg" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+              </Grid>
+            </Border>
+            <Border x:Name="NodeScene" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+              <Border.Effect>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
+              </Border.Effect>
+              <Grid>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="30"/>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="BarScene" Grid.Row="0" Background="#EEE3F7" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarSceneT" Text="场景 · 合成" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#7B1FA2" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                </Border>
+                <Grid Grid.Row="1" Margin="10,8,10,10">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+                  <Border x:Name="DropScene" Grid.Row="0" Height="92" CornerRadius="10" Background="#F7FAFD" BorderBrush="#C3D2E2" BorderThickness="1" AllowDrop="True" Tag="scene" Cursor="Hand">
+                    <Grid>
+                      <Rectangle x:Name="DashScene" Margin="4" RadiusX="7" RadiusY="7" Stroke="#B9CBDE" StrokeThickness="1.1" StrokeDashArray="4,3"/>
+                      <TextBlock x:Name="HintScene" Text="把场景图片拖到这里（可空），或点击选择" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <Image x:Name="ImgScene" Stretch="Uniform" Margin="2" Visibility="Collapsed" AllowDrop="True" Tag="scene"/>
+                    </Grid>
+                  </Border>
+                  <TextBlock x:Name="NameScene" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
+                  <Border Grid.Row="2" x:Name="SceneTextBorder" CornerRadius="7" Background="#F7FAFD" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,6,0,0">
+                    <Grid>
+                      <TextBox x:Name="SceneText" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="#16283C" Padding="8,6" MaxLength="120"/>
+                      <TextBlock x:Name="SceneTextHint" Text="补充说明（可空）" FontSize="{StaticResource FsMeta}" Foreground="#9FB0C3" Margin="9,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    </Grid>
+                  </Border>
+                </Grid>
+              </Grid>
+            </Border>
+            <Border x:Name="NodePrompt" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+              <Border.Effect>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
+              </Border.Effect>
+              <Grid>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="30"/>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="BarPrompt" Grid.Row="0" Background="#FDEBD8" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarPromptT" Text="提示词 · 文字" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#C25E10" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                </Border>
+                <Grid Grid.Row="1" Margin="10,8,10,10">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+                  <ComboBox x:Name="StyleBox" Grid.Row="0" Height="30" FontSize="{StaticResource FsMeta}" IsEditable="True" VerticalContentAlignment="Center" Padding="6,0" Background="#F7FAFD" Foreground="#16283C"/>
+                  <Border x:Name="PromptBorder" Grid.Row="1" Height="88" CornerRadius="7" Background="#F7FAFD" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,8,0,0">
+                    <Grid>
+                      <TextBox x:Name="PromptText" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="#16283C" Padding="8,6" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                      <TextBlock x:Name="PromptHint" Text="写动作 / 剧情，比如：奶龙在茶园小路上奔跑，脚下一滑，闭眼摔出画面…" FontSize="{StaticResource FsMeta}" Foreground="#9FB0C3" Margin="9,7,6,0" TextWrapping="Wrap" IsHitTestVisible="False"/>
+                    </Grid>
+                  </Border>
+                </Grid>
+              </Grid>
+            </Border>
+            </StackPanel>
+        </ScrollViewer>
+        <Border x:Name="VsStatusBar" Grid.Row="1" BorderBrush="#E1E9F1" BorderThickness="0,1,0,0" Padding="14,9,14,7">
+          <TextBlock x:Name="VsStatus" Text="等待素材 · 还差人物、背景" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" TextWrapping="Wrap"/>
+        </Border>
+        <Border Grid.Row="2" Padding="14,2,14,14">
+          <Button x:Name="GenBtn" Content="生成视频" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="White" Height="46" Cursor="Hand">
+            <Button.Template>
+              <ControlTemplate TargetType="Button">
+                <Border x:Name="bd" Background="#2F7DE1" CornerRadius="14" BorderBrush="#66FFFFFF" BorderThickness="1">
+                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="bd" Property="Background" Value="#4A90E8"/>
+                  </Trigger>
+                  <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="bd" Property="Background" Value="#2569BC"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
+              </ControlTemplate>
+            </Button.Template>
+          </Button>
+        </Border>
+      </Grid>
+      <Grid x:Name="OutView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Visibility="Collapsed">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="14,10,14,8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock x:Name="OutTitle" Text="成品 · 按时间倒序" FontSize="{StaticResource FsBody}" FontWeight="SemiBold" Foreground="#16283C" VerticalAlignment="Center"/>
+          <Button x:Name="OutRefresh" Grid.Column="1" Style="{StaticResource UtilBtn}" Content="刷新" MinWidth="64" Padding="14,4"/>
+        </Grid>
+        <ScrollViewer x:Name="OutScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8,0,6,10">
+          <StackPanel x:Name="OutList"/>
+        </ScrollViewer>
+      </Grid>
+      <Grid x:Name="CollabView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Visibility="Collapsed">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="14,8,14,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <Button x:Name="CbBoard" Grid.Column="0" Style="{StaticResource UtilBtn}" Content="留言板"/>
+          <Button x:Name="CbLog" Grid.Column="1" Style="{StaticResource UtilBtn}" Content="动作日志" Margin="8,0,0,0"/>
+          <Button x:Name="CbClaim" Grid.Column="2" Style="{StaticResource UtilBtn}" Content="占用" Margin="8,0,0,0"/>
+          <TextBlock x:Name="CbCount" Grid.Column="4" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" VerticalAlignment="Center"/>
+        </Grid>
+        <!-- 54 号：优先级图例整行撤除（档位圆点与气泡胶囊保留） -->
+        <ScrollViewer x:Name="CbScroll" Grid.Row="2" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="8,0,4,8">
+          <StackPanel x:Name="CbList"/>
+        </ScrollViewer>
+        <Border x:Name="CbInputBar" Grid.Row="3" BorderBrush="#E1E9F1" BorderThickness="0,1,0,0" Padding="14,10,14,12">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Border x:Name="CbInputBorder" Grid.Column="0" CornerRadius="18" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,8,0">
+              <Grid>
+                <TextBox x:Name="CbInput" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsBody}" Foreground="#16283C" Padding="12,8" MaxLength="1000">
+                  <TextBox.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="剪切" Command="ApplicationCommands.Cut"/>
+                      <MenuItem Header="复制" Command="ApplicationCommands.Copy"/>
+                      <MenuItem Header="粘贴" Command="ApplicationCommands.Paste"/>
+                      <Separator/>
+                      <MenuItem Header="全选" Command="ApplicationCommands.SelectAll"/>
+                    </ContextMenu>
+                  </TextBox.ContextMenu>
+                </TextBox>
+                <TextBlock x:Name="CbHint" Text="发到留言板，两个助手下一轮都会看到" FontSize="{StaticResource FsBody}" Foreground="#9FB0C3" Margin="13,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+              </Grid>
+            </Border>
+            <Button x:Name="CbTo" Grid.Column="1" Style="{StaticResource UtilBtn}" Content="发给：全员" ToolTip="点击切换收件人：全员 / 掌柜 / 大厨 / 客官" Margin="0,0,6,0"/>
+            <Button x:Name="CbKind" Grid.Column="2" Style="{StaticResource UtilBtn}" Content="类型：留言" ToolTip="点击切换类型：留言 / 状态 / 任务 / 提问 / 决定" Margin="0,0,8,0"/>
+            <Button x:Name="CbSend" Grid.Column="3" Content="发到看板" FontSize="{StaticResource FsBody}" FontWeight="SemiBold" Foreground="White" Padding="16,7" Cursor="Hand">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border x:Name="bd" Background="#2F7DE1" CornerRadius="17">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="bd" Property="Background" Value="#4A90E8"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                      <Setter TargetName="bd" Property="Background" Value="#2569BC"/>
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+          </Grid>
+        </Border>
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

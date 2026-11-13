@@ -1,0 +1,17 @@
+{
+  "description": "Bridge between DeepSeek Harness (DSH) and the nailong tri-party collaboration bus (D:\\tmp\\nailong\\bus): mirrors DSH turn activity to activity.jsonl/board.jsonl and exposes bus_inbox/bus_post tools.",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml"
+  ],
+  "main": "index.js",
+  "name": "dsh-bus-bridge",
+  "private": true,
+  "type": "module",
+  "version": "0.3.0"
+}

@@ -1,0 +1,16 @@
+- insert:
+    - id: bus-bridge
+      name: dsh-bus-bridge
+      config:
+        busRoot: 'D:\tmp\nailong\bus'
+        agentName: 'DSH'
+        mirrorTurns: true
+        mirrorQuestions: true
+        mirrorAttention: true
+        excerptChars: 800
+        autoInject: false
+        softWake: true
+        dispatcherName: '小猪'
+        orderMarker: '【掌柜 → 大厨】'
+        softWakeMaxOrders: 3
+        softWakeMaxChars: 4000
