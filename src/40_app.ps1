@@ -719,7 +719,7 @@ function New-JobChip($group, $value, $text) {
     try { $b.Style = $win.FindResource("UtilBtn") } catch { }
     $b.FontSize = $script:FsMeta
     $b.Margin = New-Object Windows.Thickness(0, 0, 6, 0)
-    $b.Padding = New-Object Windows.Thickness(10, 3)
+    $b.Padding = New-Object Windows.Thickness(10, 3, 10, 3)
     $b.Tag = "$group|$value"
     # 18-补：参数芯片补稳定 AutomationId（不改行为/文案/样式）
     $aidChip = switch ($group) {
@@ -789,7 +789,7 @@ $script:JobChips.tier["final"] = $rowTier.Children[2]
 $script:JobMotionBtn = New-Object Windows.Controls.Button
 try { $script:JobMotionBtn.Style = $win.FindResource("UtilBtn") } catch { }
 $script:JobMotionBtn.FontSize = $script:FsMeta
-$script:JobMotionBtn.Padding = New-Object Windows.Thickness(10, 3)
+$script:JobMotionBtn.Padding = New-Object Windows.Thickness(10, 3, 10, 3)
 $script:JobMotionBtn.Content = "固定 ↻"
     try { [Windows.Automation.AutomationProperties]::SetAutomationId($script:JobMotionBtn, 'Param.Motion.Cycle') } catch { }
 $script:AllChips += $script:JobMotionBtn
@@ -812,7 +812,7 @@ $script:JobSeedBox.Text = [string]$script:Job.seed
 $seedBtn = New-Object Windows.Controls.Button
 try { $seedBtn.Style = $win.FindResource("UtilBtn") } catch { }
 $seedBtn.FontSize = $script:FsMeta
-$seedBtn.Padding = New-Object Windows.Thickness(10, 3)
+$seedBtn.Padding = New-Object Windows.Thickness(10, 3, 10, 3)
 $seedBtn.Margin = New-Object Windows.Thickness(6, 0, 0, 0)
 $seedBtn.Content = "随机"
 try { [Windows.Automation.AutomationProperties]::SetAutomationId($seedBtn, 'Param.Seed.Random') } catch { }
