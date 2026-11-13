@@ -24,6 +24,8 @@ function Log-Boot([string]$tag) {
     } catch { }
 }
 
+try { Log-Boot 'assemblies-start' } catch { }
+
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
@@ -41,7 +43,9 @@ function Write-AppLog([string]$msg) {
     } catch { }
 }
 
-Add-Type -TypeDefinition @'
+try { Log-Boot 'csharp-start' } catch { }
+
+$csGlassFx = @'
 using System;
 using System.Runtime.InteropServices;
 public static class GlassFx {
@@ -71,7 +75,7 @@ public static class GlassFx {
 }
 '@
 
-Add-Type -TypeDefinition @'
+$csWinIcon = @'
 using System;
 using System.Runtime.InteropServices;
 public static class WinIcon {
@@ -79,7 +83,7 @@ public static class WinIcon {
 }
 '@
 
-Add-Type -TypeDefinition @'
+$csTaskbarId = @'
 using System;
 using System.Runtime.InteropServices;
 public static class TaskbarId {
@@ -87,6 +91,34 @@ public static class TaskbarId {
     public static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
 }
 '@
+
+# S4 / DLL 自缓存：实测三段 C# 现场编译占 0→window-parsed 的 38%（368–402ms），
+# 远超 ARCH-01 设定的 15% 门槛。首次启动编译并落盘，后续直接加载 DLL。
+# 源码变更会改变哈希 → 自动换一个新 DLL；DLL 损坏或不可写则回退现场编译。
+# 三段源码各自带 using，直接拼接会让 using 出现在类型定义之后（C# 不允许）。
+# 统一把 using 提到最前，其余按原顺序拼接。
+$body = @($csGlassFx, $csWinIcon, $csTaskbarId) | ForEach-Object {
+    (($_ -split "`n") | Where-Object { $_ -notmatch '^\s*using\s' }) -join "`n"
+}
+$allCs = "using System;`nusing System.Runtime.InteropServices;`n" + ($body -join "`n")
+$sha = [Security.Cryptography.SHA256]::Create()
+$sig = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($allCs))).Replace('-', '').Substring(0, 8)
+$cacheDir = 'D:\tmp\nailong\cache'
+$dllPath = Join-Path $cacheDir ('NailongNative_' + $sig + '.dll')
+$loaded = $false
+if (Test-Path -LiteralPath $dllPath) {
+    try { Add-Type -Path $dllPath -ErrorAction Stop; $loaded = $true } catch { $loaded = $false }
+}
+if (-not $loaded) {
+    try {
+        if (-not (Test-Path -LiteralPath $cacheDir)) { New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null }
+        Add-Type -TypeDefinition $allCs -OutputAssembly $dllPath -ErrorAction Stop
+        try { Add-Type -Path $dllPath -ErrorAction Stop } catch { }
+    } catch { }
+}
+# 兜底：无论如何保证三个类型可用（缓存不可写 / DLL 损坏 / 版本冲突）
+if (-not ('GlassFx' -as [type])) { Add-Type -TypeDefinition $allCs }
+try { Log-Boot 'csharp-done' } catch { }
 
 # ICON-01：给本进程一个独立 AppUserModelID。任务栏按钮是按进程 AUMID 归类取图标的，
 # 不改这一条，WM_SETICON 设上去也仍然显示 powershell.exe 的蓝色图标。

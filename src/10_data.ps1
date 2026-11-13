@@ -13,36 +13,46 @@ function Get-FileStamp([string]$path) {
 }
 
 # 单一状态对象：Stamp 指纹 / Items 已解析对象 / Offset 已读入字节位置 /
-# Pending 末尾未成行的字节 / LastLength 上次长度 / Tail 已读区域末尾 64 字节锚点。
-# Tail 用于识别「文件被重写或中间被改动」：仅靠长度增长无法区分追加与重写。
+# Pending 末尾未成行的字节 / LastLength 上次长度 / Anchors 已读区域 9 个采样锚点。
+# Anchors 用于识别「文件被重写或中间被就地编辑」：仅靠长度增长无法区分追加与重写。
 $script:FileState = @{}
 $script:ReadStats = @{}
 
 # 增量读的正确性依赖 append-only 协议（主窗口 / bus.ps1 / Node 桥 / HC 均满足）。
-# 若有人就地编辑或归档重写了 JSONL 文件，末尾锚点未必能察觉，需调用本函数或重启应用。
+# 9 个采样锚点覆盖已读区域的开头、中部与结尾，能察觉绝大多数就地编辑；
+# 但采样点之间的极小范围改动仍可能漏检，人工重写后仍建议调用本函数或重启应用。
 function Reset-JsonlCache {
     $script:FileState = @{}
     $script:ReadStats = @{}
 }
 
-function Get-JsonlTail([string]$path, [long]$offset) {
-    $n = [int][Math]::Min(64, $offset)
-    if ($n -le 0) { return "" }
+function Get-JsonlAnchors([string]$path, [long]$offset) {
+    if ($offset -le 0) { return "" }
+    $parts = New-Object System.Collections.ArrayList
+    $positions = New-Object System.Collections.ArrayList
+    for ($i = 0; $i -lt 8; $i++) { [void]$positions.Add([long][Math]::Floor($offset * $i / 8)) }
+    [void]$positions.Add([long][Math]::Max(0, $offset - 64))
     try {
         $fs = New-Object IO.FileStream($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
         try {
-            [void]$fs.Seek($offset - $n, [IO.SeekOrigin]::Begin)
-            $buf = New-Object byte[] $n
-            $got = $fs.Read($buf, 0, $n)
-            if ($got -le 0) { return "" }
-            if ($got -lt $n) {
-                $actual = New-Object byte[] $got
-                [Array]::Copy($buf, 0, $actual, 0, $got)
-                return [Convert]::ToBase64String($actual)
+            foreach ($pos in $positions) {
+                $n = [int][Math]::Min(64, $offset - $pos)
+                if ($n -le 0) { [void]$parts.Add(''); continue }
+                [void]$fs.Seek($pos, [IO.SeekOrigin]::Begin)
+                $buf = New-Object byte[] $n
+                $got = $fs.Read($buf, 0, $n)
+                if ($got -le 0) { [void]$parts.Add(''); continue }
+                if ($got -lt $n) {
+                    $actual = New-Object byte[] $got
+                    [Array]::Copy($buf, 0, $actual, 0, $got)
+                    [void]$parts.Add([Convert]::ToBase64String($actual))
+                } else {
+                    [void]$parts.Add([Convert]::ToBase64String($buf))
+                }
             }
-            return [Convert]::ToBase64String($buf)
         } finally { $fs.Dispose() }
     } catch { return $null }
+    return ($parts -join '|')
 }
 
 # 把一段字节按 \n 切成完整行并逐行解析；无法解析的行静默跳过（S0 基线锁定的行为）。
@@ -105,8 +115,8 @@ function Read-Jsonl([string]$path, [string]$key) {
     $len = [int64]($stamp.Split('|')[0])
     $canAppend = $false
     if ($st -and $st.Offset -le $len -and $st.LastLength -le $len) {
-        $curTail = Get-JsonlTail $path ([long]$st.Offset)
-        if ($null -ne $curTail -and $curTail -eq $st.Tail) { $canAppend = $true }
+        $curAnchors = Get-JsonlAnchors $path ([long]$st.Offset)
+        if ($null -ne $curAnchors -and $curAnchors -eq $st.Anchors) { $canAppend = $true }
     }
 
     try {
@@ -133,7 +143,7 @@ function Read-Jsonl([string]$path, [string]$key) {
             Offset     = $newOffset
             Pending    = $r.Pending
             LastLength = $len
-            Tail       = (Get-JsonlTail $path ([long]$newOffset))
+            Anchors    = (Get-JsonlAnchors $path ([long]$newOffset))
         }
         $script:ReadStats[$key] = @{
             Mode = $(if ($canAppend) { 'append' } else { 'rebuild' })

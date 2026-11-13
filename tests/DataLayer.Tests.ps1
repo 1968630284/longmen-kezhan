@@ -269,6 +269,20 @@ Describe 'S0 临时沙箱 · 数据层语义' {
         for ($k = 1; $k -lt $m.Count; $k++) { if ($m[$k].when -lt $m[$k - 1].when) { $ok = $false; break } }
         $ok | Should Be $true
     }
+
+    It 'S3 多点锚点：文件开头被就地编辑且长度增长时回退全量' {
+        Reset-Sandbox
+        [void](Read-BusJsonl 'board.jsonl')
+        $bp = Join-Path $TmpBus 'board.jsonl'
+        $text = [IO.File]::ReadAllText($bp, [Text.Encoding]::UTF8)
+        # 改写开头行 + 末尾追加一行：旧版单一尾部锚点会误判成 append，多点锚点应察觉
+        $edited = $text.Replace('"text":"b1"', '"text":"b1-EDITED"') + '{"ts":"2026-11-13 10:12:00","from":"Q","kind":"note","text":"tail","ref":"","id":"q1"}' + "`n"
+        [IO.File]::WriteAllText($bp, $edited, $Utf8NoBom)
+        $items = @(Read-BusJsonl 'board.jsonl')
+        $script:ReadStats['bus:board.jsonl'].Mode | Should Be 'rebuild'
+        $joined = ($items | ForEach-Object { [string]$_.text }) -join '|'
+        ($joined -match 'b1-EDITED') | Should Be $true
+    }
 }
 
 # 恢复真实数据指向（便于后续单独调试），并清理临时沙箱

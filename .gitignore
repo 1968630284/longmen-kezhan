@@ -74,7 +74,12 @@ bus_post_check.txt
 
 # 临时探针与构建中间产物
 tools/inspect/boot_probe_*.ps1
+tools/inspect/verify_*.ps1
 tools/inspect/*.txt
 nailong_ico_p*.txt
 nailong_p*.txt
 *.tmp.md
+
+# 运行时生成的 P/Invoke 程序集缓存（由软件首次启动自行编译）
+cache/
+*.dll
