@@ -25,7 +25,7 @@ Windows 10/11 免安装：[最新绿色包](https://github.com/1968630284/longme
 
 这套东西最初的用法不在电脑前：人在手机上发一句话，云端/本地的 DSH agent 就去板子上取单干活。
 
-![微信 → 总线 → DSH 示意图](docs/images/dispatch-flow.svg)
+![微信 → 总线 → DSH 示意图](docs/images/dispatch-flow.png)
 
 *示意图：界面元素为示意，不是真实聊天截图。*
 
