@@ -57,6 +57,11 @@ boot_err.txt
 boot_out.txt
 live3_ok.txt
 live_icon_err.txt
+# 本地 dsh web 会话地址（URL 里带 token，永不入库）
+*_host_log.txt
+web_host_log.txt
+headless_out.txt
+headless_err.txt
 
 # 调试 / 抓取产生的文本片段
 chunk_*.txt
