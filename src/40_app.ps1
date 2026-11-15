@@ -1,10 +1,17 @@
 
 try {
+    $xaml = Resolve-UiXaml $xaml
     $win = [Windows.Markup.XamlReader]::Parse($xaml)
 try { Log-Boot 'window-parsed' } catch { }
 } catch {
     [IO.File]::WriteAllText("D:\tmp\live3_err.txt", $_.Exception.ToString(), [Text.Encoding]::UTF8)
     exit 1
+}
+
+# UI-01：脚本侧构造的气泡与 XAML 控件共用同一套字号令牌，避免两套数值分叉
+foreach ($fsKey in @('FsCaption','FsMeta','FsBody','FsTitle','FsDisplay')) {
+    $fsVal = $win.Resources[$fsKey]
+    if ($null -ne $fsVal) { Set-Variable -Name $fsKey -Value ([double]$fsVal) -Scope Script }
 }
 
 $FeedList   = $win.FindName("FeedList")
@@ -130,59 +137,107 @@ $FlowBar = $win.FindName("FlowBar"); $VsStatusBar = $win.FindName("VsStatusBar")
 $FlowDotChar = $win.FindName("FlowDotChar"); $FlowDotBg = $win.FindName("FlowDotBg")
 $FlowDotScene = $win.FindName("FlowDotScene"); $FlowDotPrompt = $win.FindName("FlowDotPrompt")
 function Apply-Theme {
-    if ($script:dark) {
-        $RootBorder.Background = Brush "#F2172432"
-        $RootBorder.BorderBrush = Brush "#172432"
-        try { $hh = (New-Object Windows.Interop.WindowInteropHelper($win)).Handle; if ($hh -ne [IntPtr]::Zero) { [GlassFx]::EnableAcrylic($hh, $true) } } catch { }
-        $HeaderLine.Background = Brush "#1E2A38"
-        $InputBar.BorderBrush = Brush "#1E2A38"
-        $TitleText.Foreground = Brush "#EAF1F8"
-        $StatusText.Foreground = Brush "#93A8BE"
-        $LiveBadge.Background = Brush "#2B35C759"
-        $LiveBadge.BorderBrush = Brush "#6635C759"
-        $LiveBadgeText.Foreground = Brush "#4ADE80"
-        $InputBox.Foreground = Brush "#EAF1F8"
-        $InputHint.Foreground = Brush "#6E8299"
-        $InputBorder.Background = Brush "#22303F"
-        $InputBorder.BorderBrush = Brush "#3A4E66"
-        $SearchBorder.Background = Brush "#22303F"
-        $SearchBorder.BorderBrush = Brush "#3A4E66"
-        $SearchBox.Foreground = Brush "#EAF1F8"
-        $SearchHint.Foreground = Brush "#6E8299"
-        $DarkBtn.ToolTip = "切到浅色"
-    } else {
-        $RootBorder.Background = Brush "#D9F4F9FF"
-        $RootBorder.BorderBrush = Brush "#D7E1EC"
-        try { $hh = (New-Object Windows.Interop.WindowInteropHelper($win)).Handle; if ($hh -ne [IntPtr]::Zero) { [GlassFx]::EnableAcrylic($hh, $false) } } catch { }
-        $HeaderLine.Background = Brush "#E1E9F1"
-        $InputBar.BorderBrush = Brush "#E1E9F1"
-        $TitleText.Foreground = Brush "#16283C"
-        $StatusText.Foreground = Brush "#7A8CA3"
-        $LiveBadge.Background = Brush "#1A35C759"
-        $LiveBadge.BorderBrush = Brush "#4D35C759"
-        $LiveBadgeText.Foreground = Brush "#1E9E4A"
-        $InputBox.Foreground = Brush "#16283C"
-        $InputHint.Foreground = Brush "#9FB0C3"
-        $InputBorder.Background = Brush "#FFFFFF"
-        $InputBorder.BorderBrush = Brush "#D7E1EC"
-        $SearchBorder.Background = Brush "#FFFFFF"
-        $SearchBorder.BorderBrush = Brush "#D7E1EC"
-        $SearchBox.Foreground = Brush "#16283C"
-        $SearchHint.Foreground = Brush "#9FB0C3"
-        $DarkBtn.ToolTip = "切到深色"
+    # UI-01：主题只换一层。颜色统一取自 00_header.ps1 的 $script:UiTokens，
+    # 不再在深浅两个分支里各写一遍 hex。交互态已改为主题无关的 Opacity 反馈。
+    Set-UiTheme $script:dark
+    $uiMap = @(
+        ,@('RootBorder',    'Background',  'Surface')
+        ,@('RootBorder',    'BorderBrush', 'SurfaceStroke')
+        ,@('HeaderLine',    'Background',  'Rail')
+        ,@('InputBar',      'BorderBrush', 'Rail')
+        ,@('RailLine',      'Background',  'Rail')
+        ,@('CbInputBar',    'BorderBrush', 'Rail')
+        ,@('TitleText',     'Foreground',  'Ink')
+        ,@('StatusText',    'Foreground',  'Meta')
+        ,@('LiveBadge',     'Background',  'LiveBadgeBg')
+        ,@('LiveBadge',     'BorderBrush', 'LiveBadgeLine')
+        ,@('LiveBadgeText', 'Foreground',  'LiveGreen')
+        ,@('LiveDot',       'Fill',        'LiveDot')
+        ,@('InputBox',      'Foreground',  'Ink')
+        ,@('InputHint',     'Foreground',  'Hint')
+        ,@('InputBorder',   'Background',  'Card')
+        ,@('InputBorder',   'BorderBrush', 'Stroke')
+        ,@('SearchBorder',  'Background',  'Card')
+        ,@('SearchBorder',  'BorderBrush', 'Stroke')
+        ,@('SearchBox',     'Foreground',  'Ink')
+        ,@('SearchHint',    'Foreground',  'Hint')
+        ,@('CbInputBorder', 'Background',  'Card')
+        ,@('CbInputBorder', 'BorderBrush', 'Stroke')
+    # UI-01：由 src/30_window.xaml 自动提取，覆盖工坊 / 传菜口 / 协作台等具名控件
+        ,@('tb', 'Background', 'Thumb')
+        ,@('CollabDot', 'Fill', 'Danger')
+        ,@('bd', 'Background', 'Accent')
+        ,@('FlowBar', 'Background', 'Card')
+        ,@('FlowBar', 'BorderBrush', 'Line')
+        ,@('FlowDotChar', 'Fill', 'Dash')
+        ,@('FlowDotScene', 'Fill', 'Dash')
+        ,@('FlowDotBg', 'Fill', 'Dash')
+        ,@('FlowDotPrompt', 'Fill', 'Dash')
+        ,@('NodeChar', 'Background', 'Card')
+        ,@('NodeChar', 'BorderBrush', 'Line')
+        ,@('BarChar', 'Background', 'CharSoft')
+        ,@('BarCharT', 'Foreground', 'Char')
+        ,@('DropChar', 'Background', 'Soft')
+        ,@('DropChar', 'BorderBrush', 'Dash')
+        ,@('DashChar', 'Stroke', 'Dash')
+        ,@('HintChar', 'Foreground', 'Meta')
+        ,@('NameChar', 'Foreground', 'Meta')
+        ,@('NodeBg', 'Background', 'Card')
+        ,@('NodeBg', 'BorderBrush', 'Line')
+        ,@('BarBg', 'Background', 'BgSoft')
+        ,@('BarBgT', 'Foreground', 'BgCat')
+        ,@('DropBg', 'Background', 'Soft')
+        ,@('DropBg', 'BorderBrush', 'Dash')
+        ,@('DashBg', 'Stroke', 'Dash')
+        ,@('HintBg', 'Foreground', 'Meta')
+        ,@('NameBg', 'Foreground', 'Meta')
+        ,@('NodeScene', 'Background', 'Card')
+        ,@('NodeScene', 'BorderBrush', 'Line')
+        ,@('BarScene', 'Background', 'SceneSoft')
+        ,@('BarSceneT', 'Foreground', 'Scene')
+        ,@('DropScene', 'Background', 'Soft')
+        ,@('DropScene', 'BorderBrush', 'Dash')
+        ,@('DashScene', 'Stroke', 'Dash')
+        ,@('HintScene', 'Foreground', 'Meta')
+        ,@('NameScene', 'Foreground', 'Meta')
+        ,@('SceneTextBorder', 'Background', 'Soft')
+        ,@('SceneTextBorder', 'BorderBrush', 'Line')
+        ,@('SceneText', 'Foreground', 'Ink')
+        ,@('SceneTextHint', 'Foreground', 'Hint')
+        ,@('NodePrompt', 'Background', 'Card')
+        ,@('NodePrompt', 'BorderBrush', 'Line')
+        ,@('BarPrompt', 'Background', 'PromptSoft')
+        ,@('BarPromptT', 'Foreground', 'Prompt')
+        ,@('StyleBox', 'Background', 'Soft')
+        ,@('StyleBox', 'Foreground', 'Ink')
+        ,@('PromptBorder', 'Background', 'Soft')
+        ,@('PromptBorder', 'BorderBrush', 'Line')
+        ,@('PromptText', 'Foreground', 'Ink')
+        ,@('PromptHint', 'Foreground', 'Hint')
+        ,@('VsStatusBar', 'BorderBrush', 'Rail')
+        ,@('VsStatus', 'Foreground', 'Meta')
+        ,@('OutTitle', 'Foreground', 'Ink')
+        ,@('CbCount', 'Foreground', 'Meta')
+        ,@('CbInput', 'Foreground', 'Ink')
+        ,@('CbHint', 'Foreground', 'Hint')
+    )
+    foreach ($m in $uiMap) {
+        try {
+            $el = $win.FindName($m[0])
+            if ($el) { $el.($m[1]) = Tok $m[2] }
+        } catch { }
     }
-    $cardBg = if ($script:dark) { "#22303F" } else { "#FFFFFF" }
-    $lineC = if ($script:dark) { "#3A4E66" } else { "#DCE4EE" }
-    $ink = if ($script:dark) { "#AFC0D2" } else { "#3D4E63" }
-    foreach ($el in @($InputBorder, $SearchBorder, $CbInputBorder)) { if ($el) { $el.Background = Brush $cardBg; $el.BorderBrush = Brush $lineC } }
-    foreach ($el in @($FlowBar, $NodeChar, $NodeBg, $NodeScene, $NodePrompt)) { if ($el) { $el.Background = Brush $cardBg } }
-    foreach ($el in @($CbTo, $CbKind)) { if ($el) { $el.Background = Brush $cardBg; $el.Foreground = Brush $ink } }
-    foreach ($el in @($CbTo, $CbKind, $CbBoard, $CbLog, $CbClaim)) { if ($el) { $el.BorderBrush = Brush $lineC } }
+    $card = Tok 'Card'; $line = Tok 'Stroke'; $ink = Tok 'Ink2'
+    foreach ($el in @($FlowBar, $NodeChar, $NodeBg, $NodeScene, $NodePrompt)) { if ($el) { $el.Background = $card } }
+    foreach ($el in @($CbTo, $CbKind)) { if ($el) { $el.Background = $card; $el.Foreground = $ink } }
+    foreach ($el in @($CbTo, $CbKind, $CbBoard, $CbLog, $CbClaim)) { if ($el) { $el.BorderBrush = $line } }
+    try { $hh = (New-Object Windows.Interop.WindowInteropHelper($win)).Handle; if ($hh -ne [IntPtr]::Zero) { [GlassFx]::EnableAcrylic($hh, $script:dark) } } catch { }
+    $DarkBtn.ToolTip = if ($script:dark) { "切到浅色" } else { "切到深色" }
     try { if ($script:cbView) { Set-CbView $script:cbView } } catch { }
-    try { if ($RailLine) { $RailLine.Background = Brush $(if ($script:dark) { "#1E2A38" } else { "#E1E9F1" })`r`n    try { if ($CbInputBar) { $CbInputBar.BorderBrush = Brush $(if ($script:dark) { "#172432" } else { "#E1E9F1" }) } } catch { } } } catch { }
     Update-Rail
     Apply-StudioTheme
 }
+
 function New-GridBrush($dotHex) {
     $brush = New-Object Windows.Media.DrawingBrush
     $brush.TileMode = "Tile"
@@ -200,23 +255,24 @@ function New-GridBrush($dotHex) {
 }
 function Apply-StudioTheme {
     if (-not $NodeChar) { return }
-    $script:VsCardBg = if ($script:dark) { "#22303F" } else { "#FFFFFF" }
-    $script:VsCardLine = if ($script:dark) { "#3A4E66" } else { "#DCE4EE" }
-    $script:VsInk = if ($script:dark) { "#EAF1F8" } else { "#16283C" }
-    $script:VsMeta = if ($script:dark) { "#93A8BE" } else { "#8496AB" }
-    $dropBg = if ($script:dark) { "#1B2836" } else { "#F7FAFD" }
-    $dashC = if ($script:dark) { "#46586E" } else { "#B9CBDE" }
+    $t = $script:UiTokens
+    $script:VsCardBg = $t.Card
+    $script:VsCardLine = $t.Stroke
+    $script:VsInk = $t.Ink
+    $script:VsMeta = $t.Meta
+    $dropBg = $t.Soft
+    $dashC = $t.Dash
     $pal = @{
-        char = @("#DCEBFB", "#1565C0", "#1E3A56", "#9CC3EE")
-        bg = @("#DFF2E2", "#2E7D32", "#1E4030", "#9AD3A5")
-        scene = @("#EEE3F7", "#7B1FA2", "#39264D", "#D3A8EE")
-        prompt = @("#FDEBD8", "#C25E10", "#4D3418", "#F2C184")
+        char   = @($t.CharSoft,   $t.Char)
+        bg     = @($t.BgSoft,     $t.BgCat)
+        scene  = @($t.SceneSoft,  $t.Scene)
+        prompt = @($t.PromptSoft, $t.Prompt)
     }
     $bars = @{ char = @($BarChar, $BarCharT); bg = @($BarBg, $BarBgT); scene = @($BarScene, $BarSceneT); prompt = @($BarPrompt, $BarPromptT) }
     foreach ($k in $pal.Keys) {
         $c = $pal[$k]
-        if ($script:dark) { $bars[$k][0].Background = Brush $c[2]; $bars[$k][1].Foreground = Brush $c[3] }
-        else { $bars[$k][0].Background = Brush $c[0]; $bars[$k][1].Foreground = Brush $c[1] }
+        $bars[$k][0].Background = Brush $c[0]
+        $bars[$k][1].Foreground = Brush $c[1]
     }
     foreach ($k in @("char", "bg", "scene")) {
         $n = $script:VsNodes[$k]
@@ -245,7 +301,7 @@ function Apply-StudioTheme {
     $VsStatus.Foreground = Brush $script:VsMeta
     $FlowBar.Background = Brush $script:VsCardBg
     $FlowBar.BorderBrush = Brush $script:VsCardLine
-    $VsStatusBar.BorderBrush = Brush $(if ($script:dark) { "#1E2A38" } else { "#DCE4EE" })
+    $VsStatusBar.BorderBrush = Tok 'Rail'
     # （9 号：工坊成品区已移除，OutLabel 不再存在）
     $script:lastOutSig = "`0force"
 
@@ -283,9 +339,11 @@ $script:KindName = @{ status = "状态"; command = "命令"; result = "结果"; 
 $script:dark = $false
 $script:filter = ""
 $script:forceRefresh = $false
-$script:PalLight = @{ MyBg = "#FFFFFF"; MyLine = "#E2EAF2"; DaveBg = "#D9E9FF"; Ink = "#1B2C42"; Meta = "#8496AB" }
-$script:PalDark = @{ MyBg = "#22303F"; MyLine = "#3A4E66"; DaveBg = "#2B4A73"; Ink = "#E9F1F9"; Meta = "#93A8BE" }
-function Pal() { if ($script:dark) { return $script:PalDark } else { return $script:PalLight } }
+# UI-01：历史遗留的气泡色板改为从单一色板派生（无调用点，保留接口）
+function Pal() {
+    $t = $script:UiTokens
+    return @{ MyBg = $t.Card; MyLine = $t.Stroke; DaveBg = $t.SelfBg; Ink = $t.Ink; Meta = $t.Meta }
+}
 $script:ChipBg   = @{ status = "#E4F2E7"; command = "#E1EEFC"; result = "#F1E4F7"; question = "#FBE7E4"; note = "#E9EEF2"; task = "#E1EEFC"; decision = "#FBE7E4"; discuss = "#FBF0DC"; log = "#E9EEF2" }
 $script:ChipFg   = @{ status = "#1E7D32"; command = "#1565C0"; result = "#7B1FA2"; question = "#C62828"; note = "#546E7A"; task = "#1565C0"; decision = "#C62828"; discuss = "#B26500"; log = "#546E7A" }
 
@@ -414,7 +472,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
         $sys.TextWrapping = "Wrap"
         $sys.MaxWidth = 470
         $sys.TextAlignment = "Center"
-        $sys.Foreground = Brush $(if ($dark) { "#93A8BE" } else { "#8496AB" })
+        $sys.Foreground = Tok 'Meta'
         $sys.Margin = New-Object Windows.Thickness(24, 4, 24, 4)
         $outer.Children.Add($sys) | Out-Null
         return $outer
@@ -434,7 +492,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
     $aT.Text = $(if ($lbl.Length -gt 0) { $lbl.Substring(0, 1) } else { "?" })
     $aT.FontSize = $script:FsBody
     $aT.FontWeight = "Bold"
-    $aT.Foreground = Brush "#FFFFFF"
+    $aT.Foreground = Tok 'AccentInk'
     $aT.HorizontalAlignment = "Center"
     $aT.VerticalAlignment = "Center"
     $av.Child = $aT
@@ -444,7 +502,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
     $meta = New-Object Windows.Controls.TextBlock
     $meta.Text = [string]$role.label + " · " + [string]$Ts
     $meta.FontSize = $script:FsMeta
-    $meta.Foreground = Brush $(if ($dark) { "#93A8BE" } else { "#8496AB" })
+    $meta.Foreground = Tok 'Meta'
     $meta.Margin = New-Object Windows.Thickness(4, 0, 4, 3)
     $meta.HorizontalAlignment = $(if ($isSelf) { "Right" } else { "Left" })
     $content.Children.Add($meta) | Out-Null
@@ -453,16 +511,16 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
     $bubble.MaxWidth = 420
     $bubble.Padding = New-Object Windows.Thickness(12, 9, 12, 9)
     $bubble.CornerRadius = New-Object Windows.CornerRadius(18)
-    $bgc = $(if ($isSelf) { $(if ($dark) { "#3B82F6" } else { "#2F7DE1" }) } else { $(if ($dark) { "#2A2E38" } else { "#FFFFFF" }) })
+    $bgc = if ($isSelf) { $script:UiTokens.SelfBg } else { $script:UiTokens.Card }
     $bubble.Background = Brush $bgc
     if (-not $isSelf) {
-        $bubble.BorderBrush = Brush $(if ($dark) { "#3A4E66" } else { "#E4ECF5" })
+        $bubble.BorderBrush = Tok 'Stroke'
         $bubble.BorderThickness = New-Object Windows.Thickness(1)
     }
     # 50-补：阴影保留，照旧
     $shadow = New-Object Windows.Media.Effects.DropShadowEffect
     $shadow.BlurRadius = 6; $shadow.ShadowDepth = 1; $shadow.Opacity = 0.07
-    $shadow.Color = [Windows.Media.ColorConverter]::ConvertFromString("#33507A")
+    $shadow.Color = (Tok 'Shadow').Color
     $bubble.Effect = $shadow
 
     $inner = New-Object Windows.Controls.StackPanel
@@ -473,15 +531,15 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
         $chip = New-Object Windows.Controls.Border
         $chip.CornerRadius = New-Object Windows.CornerRadius(7)
         $chip.Background = Brush $script:ChipBg[$kind]
-        if (-not $chip.Background) { $chip.Background = Brush "#E9EEF2" }
+        if (-not $chip.Background) { $chip.Background = Tok 'Soft' }
         $chip.Padding = New-Object Windows.Thickness(8, 2.5, 8, 2.5)
         $chipText = New-Object Windows.Controls.TextBlock
         $chipText.Text = $script:KindName[$kind]
         if (-not $chipText.Text) { $chipText.Text = "留言" }
-        $chipText.FontSize = 11
+        $chipText.FontSize = $script:FsCaption
         $chipText.FontWeight = "SemiBold"
         $chipText.Foreground = Brush $script:ChipFg[$kind]
-        if (-not $chipText.Foreground) { $chipText.Foreground = Brush "#546E7A" }
+        if (-not $chipText.Foreground) { $chipText.Foreground = Tok 'Meta' }
         $chip.Child = $chipText
         $chipRow.Children.Add($chip) | Out-Null
         if ($Prio) {
@@ -503,8 +561,8 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
         }
         $inner.Children.Add($chipRow) | Out-Null
     }
-    $fg = if ($isSelf) { "#FFFFFF" } else { $(if ($dark) { "#E9F1F9" } else { "#1B2C42" }) }
-    $body = New-SelectableText ([string]$Text) 13 (Brush $fg) 20 $bgc
+    $fg = if ($isSelf) { $script:UiTokens.SelfInk } else { $script:UiTokens.Ink }
+    $body = New-SelectableText ([string]$Text) $script:FsBody (Brush $fg) 20 $bgc
     $inner.Children.Add($body) | Out-Null
     $bubble.Child = $inner
     $content.Children.Add($bubble) | Out-Null
@@ -591,8 +649,8 @@ $send = {
 $win.FindName("SendBtn").Add_Click($send)
 $InputBox.Add_KeyDown({ if ($_.Key -eq "Enter") { & $send } })
 $InputBox.Add_TextChanged({ $InputHint.Visibility = if ($InputBox.Text) { "Collapsed" } else { "Visible" } })
-$InputBox.Add_GotFocus({ $InputBorder.BorderBrush = Brush "#2F7DE1" })
-$InputBox.Add_LostFocus({ $InputBorder.BorderBrush = Brush $(if ($script:dark) { "#3A4E66" } else { "#D7E1EC" }) })
+$InputBox.Add_GotFocus({ $InputBorder.BorderBrush = Tok 'Accent' })
+$InputBox.Add_LostFocus({ $InputBorder.BorderBrush = Tok 'Stroke' })
 $win.FindName("BtnClose").Add_Click({ $win.Close() })
 $win.FindName("BtnMin").Add_Click({ $win.WindowState = "Minimized" })
 $script:big = $false
@@ -612,9 +670,9 @@ $Header.Add_MouseLeftButtonDown({
 $VsRoot = "D:\tmp\video_studio"
 $script:VsLines = @()
 $script:VsCardBg = "#FFFFFF"
-$script:VsCardLine = "#DCE4EE"
-$script:VsInk = "#16283C"
-$script:VsMeta = "#8496AB"
+$script:VsCardLine = $script:UiTokens.Stroke
+$script:VsInk = $script:UiTokens.Ink
+$script:VsMeta = $script:UiTokens.Meta
 $script:VsNodes = @{
     char  = @{ Node = $NodeChar;  Drop = $DropChar;  Img = $ImgChar;  Hint = $HintChar;  Dash = $DashChar;  Name = $NameChar;  Accent = "#2F7DE1"; Path = $null }
     bg    = @{ Node = $NodeBg;    Drop = $DropBg;    Img = $ImgBg;    Hint = $HintBg;    Dash = $DashBg;    Name = $NameBg;    Accent = "#43A047"; Path = $null }
@@ -644,8 +702,8 @@ function New-TriSlot($key, $label, $accent) {
     $bd.CornerRadius = New-Object Windows.CornerRadius(8)
     $bd.Height = 76
     $bd.Width = 104
-    $bd.Background = Brush "#F7FAFD"
-    $bd.BorderBrush = Brush "#C3D2E2"
+    $bd.Background = Tok 'Soft'
+    $bd.BorderBrush = Tok 'Dash'
     $bd.BorderThickness = New-Object Windows.Thickness(1)
     $bd.AllowDrop = $true
     $bd.Tag = $key
@@ -655,7 +713,7 @@ function New-TriSlot($key, $label, $accent) {
     $dash.Margin = New-Object Windows.Thickness(4)
     $dash.RadiusX = 6
     $dash.RadiusY = 6
-    $dash.Stroke = Brush "#B9CBDE"
+    $dash.Stroke = Tok 'Dash'
     $dash.StrokeThickness = 1.1
     $dash.StrokeDashArray = New-Object Windows.Media.DoubleCollection
     $dash.StrokeDashArray.Add(4) | Out-Null
@@ -663,7 +721,7 @@ function New-TriSlot($key, $label, $accent) {
     $hint = New-Object Windows.Controls.TextBlock
     $hint.Text = $label
     $hint.FontSize = 11
-    $hint.Foreground = Brush "#8496AB"
+    $hint.Foreground = Tok 'Meta'
     $hint.HorizontalAlignment = "Center"
     $hint.VerticalAlignment = "Center"
     $hint.TextWrapping = "Wrap"
@@ -681,7 +739,7 @@ function New-TriSlot($key, $label, $accent) {
     $bd.Child = $g
     $nm = New-Object Windows.Controls.TextBlock
     $nm.FontSize = $script:FsCaption
-    $nm.Foreground = Brush "#8496AB"
+    $nm.Foreground = Tok 'Meta'
     $nm.TextTrimming = "CharacterEllipsis"
     $nm.Margin = New-Object Windows.Thickness(1, 3, 0, 0)
     $nm.Text = "未选（可空）"
@@ -709,7 +767,7 @@ function New-JobLabel($text) {
     $t.FontSize = $script:FsMeta
     $t.Width = 56
     $t.VerticalAlignment = "Center"
-    $t.Foreground = Brush "#8496AB"
+    $t.Foreground = Tok 'Meta'
     $script:JobLabelBlocks += $t
     return $t
 }
@@ -752,7 +810,7 @@ $headP = New-Object Windows.Controls.TextBlock
 $headP.Text = "生成参数 · Job"
 $headP.FontSize = 12.5
 $headP.FontWeight = "SemiBold"
-$headP.Foreground = Brush "#2F7DE1"
+$headP.Foreground = Tok 'Accent'
 $headP.Margin = New-Object Windows.Thickness(0, 0, 0, 8)
 [void]$pSp.Children.Add($headP)
 
@@ -846,7 +904,7 @@ $headS = New-Object Windows.Controls.TextBlock
 $headS.Text = "提示词六槽 · 可选，留空则用下面总提示词"
 $headS.FontSize = 12.5
 $headS.FontWeight = "SemiBold"
-$headS.Foreground = Brush "#C25E10"
+$headS.Foreground = Tok 'Prompt'
 $headS.Margin = New-Object Windows.Thickness(0, 0, 0, 8)
 [void]$sSp.Children.Add($headS)
 $slotGrid = New-Object Windows.Controls.Grid
@@ -859,7 +917,7 @@ for ($si = 0; $si -lt 6; $si++) {
     $lt = New-Object Windows.Controls.TextBlock
     $lt.Text = $name
     $lt.FontSize = 11
-    $lt.Foreground = Brush "#8496AB"
+    $lt.Foreground = Tok 'Meta'
     $script:JobSlotLabels += $lt
     $tb = New-Object Windows.Controls.TextBox
     $tb.Height = 26
@@ -887,10 +945,10 @@ if ($spParent -and $spParent.Children) {
 }
 
 function Sync-JobChips {
-    $onBg = "#2F7DE1"
-    $offBg = if ($script:dark) { "#2A3B4D" } else { "#F1F5FA" }
-    $ink = if ($script:dark) { "#EAF1F8" } else { "#16283C" }
-    $line = if ($script:dark) { "#3A4E66" } else { "#DCE4EE" }
+    $onBg = $script:UiTokens.Accent
+    $offBg = $script:UiTokens.Soft
+    $ink = $script:UiTokens.Ink
+    $line = $script:UiTokens.Stroke
     foreach ($grp in @("ratio", "duration", "tier")) {
         $cur = [string]$script:Job[$grp]
         foreach ($k in @($script:JobChips[$grp].Keys)) {
@@ -898,7 +956,7 @@ function Sync-JobChips {
             if (-not $chip) { continue }
             if ([string]$chip.Tag.Split("|")[1] -eq $cur) {
                 $chip.Background = Brush $onBg
-                $chip.Foreground = Brush "#FFFFFF"
+                $chip.Foreground = Tok 'AccentInk'
                 $chip.BorderBrush = Brush $onBg
             } else {
                 $chip.Background = Brush $offBg
@@ -933,17 +991,17 @@ function Update-JobStatus {
 }
 $script:ApplyJobParamsTheme = {
     $dark = [bool]$script:dark
-    $bg = if ($dark) { "#22303F" } else { "#FFFFFF" }
-    $line = if ($dark) { "#3A4E66" } else { "#DCE4EE" }
-    $ink = if ($dark) { "#EAF1F8" } else { "#16283C" }
-    $meta = if ($dark) { "#93A8BE" } else { "#8496AB" }
-    $field = if ($dark) { "#1B2836" } else { "#F7FAFD" }
+    $bg = $script:UiTokens.Card
+    $line = $script:UiTokens.Stroke
+    $ink = $script:UiTokens.Ink
+    $meta = $script:UiTokens.Meta
+    $field = $script:UiTokens.Soft
     foreach ($bd in @($script:ParamsCard, $script:SlotsCard)) {
         if ($bd) { $bd.Background = Brush $bg; $bd.BorderBrush = Brush $line }
     }
     foreach ($t in $script:JobLabelBlocks) { $t.Foreground = Brush $meta }
     foreach ($b in @($script:JobMotionBtn, $seedBtn)) {
-        if ($b) { $b.Background = Brush $(if ($dark) { "#2A3B4D" } else { "#F1F5FA" }); $b.Foreground = Brush $ink; $b.BorderBrush = Brush $line }
+        if ($b) { $b.Background = Tok 'Soft'; $b.Foreground = Brush $ink; $b.BorderBrush = Brush $line }
     }
     foreach ($t in $script:JobSlotLabels) { $t.Foreground = Brush $meta }
     foreach ($tb in @($script:JobSeedBox, $script:JobNegBox)) {
@@ -957,8 +1015,8 @@ $script:ApplyJobParamsTheme = {
         $n = $script:VsNodes[$k]
         if ($n) {
             $n.Drop.Background = Brush $field
-            $n.Drop.BorderBrush = Brush $(if ($dark) { "#46586E" } else { "#B9CBDE" })
-            if ($n.Dash) { $n.Dash.Stroke = Brush $(if ($dark) { "#46586E" } else { "#B9CBDE" }) }
+            $n.Drop.BorderBrush = Tok 'Dash'
+            if ($n.Dash) { $n.Dash.Stroke = Tok 'Dash' }
             $n.Name.Foreground = Brush $meta
             $n.Hint.Foreground = Brush $meta
         }
@@ -992,7 +1050,7 @@ function Add-FlowLine($x1, $y1, $x2, $y2) {
     $pg.Figures.Add($fig) | Out-Null
     $path = New-Object Windows.Shapes.Path
     $path.Data = $pg
-    $path.Stroke = Brush "#A9BCD2"
+    $path.Stroke = Tok 'Dash'
     $path.StrokeThickness = 2
     $VsCanvas.Children.Insert(0, $path) | Out-Null
     $script:VsLines += $path
@@ -1000,8 +1058,8 @@ function Add-FlowLine($x1, $y1, $x2, $y2) {
 function Add-Port($x, $y) {
     $e = New-Object Windows.Shapes.Ellipse
     $e.Width = 9; $e.Height = 9
-    $e.Fill = Brush "#8FA6BC"
-    $e.Stroke = Brush "#FFFFFF"
+    $e.Fill = Tok 'Dash'
+    $e.Stroke = Tok 'AccentInk'
     $e.StrokeThickness = 1.6
     [Windows.Controls.Canvas]::SetLeft($e, $x - 4.5)
     [Windows.Controls.Canvas]::SetTop($e, $y - 4.5)
@@ -1030,7 +1088,7 @@ function Set-NodeImage($key, $path) {
 }
 function Refresh-Flow {
     try {
-        $on = Brush "#35C759"; $off = Brush "#C3D2E2"
+        $on = Brush "#35C759"; $off = Tok 'Dash'
         $FlowDotChar.Fill = if ($script:VsNodes["char"].Path) { $on } else { $off }
         $FlowDotBg.Fill = if ($script:VsNodes["bg"].Path) { $on } else { $off }
         $FlowDotScene.Fill = if ($script:VsNodes["scene"].Path -or $SceneText.Text.Trim()) { $on } else { $off }
@@ -1238,8 +1296,8 @@ function Update-PresenceBadge {
         $script:badgeState = $state
         if ($state -eq "ok") {
             if ($LiveBadgeText) { $LiveBadgeText.Text = "营业中" }
-            if ($LiveBadge) { $LiveBadge.Background = Brush $(if ($script:dark) { "#2B35C759" } else { "#1A35C759" }); $LiveBadge.BorderBrush = Brush $(if ($script:dark) { "#6635C759" } else { "#4D35C759" }) }
-            if ($LiveBadgeText) { $LiveBadgeText.Foreground = Brush $(if ($script:dark) { "#4ADE80" } else { "#1E9E4A" }) }
+            if ($LiveBadge) { $LiveBadge.Background = Tok 'LiveBadgeBg'; $LiveBadge.BorderBrush = Tok 'LiveBadgeLine' }
+            if ($LiveBadgeText) { $LiveBadgeText.Foreground = Tok 'LiveGreen' }
             if ($LiveDot) { $LiveDot.Fill = Brush "#35C759"; $LiveDot.Opacity = 1.0 }
             Start-LiveBadge
         } elseif ($state -eq "abnormal") {
@@ -1379,8 +1437,8 @@ function Play-Press($el, [double]$scale, [int]$ms) {
 
 function Update-Rail {
     try {
-        $active = if ($script:dark) { "#2B4A73" } else { "#DCEBFC" }
-        $fg = if ($script:dark) { "#AFC0D2" } else { "#5A6E85" }
+        $active = $script:UiTokens.CharSoft
+        $fg = $script:UiTokens.Ink2
         $BtnChat.Background = Brush $(if ((-not $script:studio) -and (-not $script:collab) -and (-not $script:out)) { $active } else { "Transparent" })
         $StudioBtn.Background = Brush $(if ($script:studio) { $active } else { "Transparent" })
         if ($OutBtn) { $OutBtn.Background = Brush $(if ($script:out) { $active } else { "Transparent" }) }
@@ -1455,14 +1513,14 @@ function Confirm-Dialog($msg) {
         $dw.Topmost = $true
         $dw.ResizeMode = "NoResize"
         $dw.WindowStyle = "ToolWindow"
-        $dw.Background = Brush $(if ($script:dark) { "#22303F" } else { "#FFFFFF" })
+        $dw.Background = Tok 'Card'
         $sp = New-Object Windows.Controls.StackPanel
         $sp.Margin = New-Object Windows.Thickness(18, 16, 18, 14)
         $tt = New-Object Windows.Controls.TextBlock
         $tt.Text = $msg
         $tt.FontSize = 12.5
         $tt.TextWrapping = "Wrap"
-        $tt.Foreground = Brush $(if ($script:dark) { "#EAF1F8" } else { "#16283C" })
+        $tt.Foreground = Tok 'Ink'
         [void]$sp.Children.Add($tt)
         $row = New-Object Windows.Controls.StackPanel
         $row.Orientation = "Horizontal"
@@ -1479,7 +1537,7 @@ function Confirm-Dialog($msg) {
         $bYes.Content = "确定删除"
         $bYes.Padding = New-Object Windows.Thickness(16, 6, 16, 6)
         $bYes.Background = Brush "#D9534F"
-        $bYes.Foreground = Brush "#FFFFFF"
+        $bYes.Foreground = Tok 'AccentInk'
         $bYes.BorderBrush = Brush "#D9534F"
         $bYes.Add_Click({ $script:DlgResult = $true; $dw.Close() }.GetNewClosure())
         [void]$row.Children.Add($bNo)
@@ -1524,11 +1582,11 @@ function Show-Player($path) {
 function New-OutCard($f) {
     $id = [IO.Path]::GetFileNameWithoutExtension($f.Name)
     $dark = [bool]$script:dark
-    $bg = if ($dark) { "#22303F" } else { "#FFFFFF" }
-    $line = if ($dark) { "#3A4E66" } else { "#E4ECF5" }
-    $ink = if ($dark) { "#EAF1F8" } else { "#16283C" }
-    $meta = if ($dark) { "#93A8BE" } else { "#8496AB" }
-    $field = if ($dark) { "#1B2836" } else { "#F1F5FA" }
+    $bg = $script:UiTokens.Card
+    $line = $script:UiTokens.Stroke
+    $ink = $script:UiTokens.Ink
+    $meta = $script:UiTokens.Meta
+    $field = $script:UiTokens.Soft
     $script:OutField = $field
     $script:OutInk = $ink
     $script:OutLine = $line
@@ -1636,7 +1694,7 @@ function New-OutCard($f) {
                         # 兜底：键盘/程序触发时也能进入警示态（正常路径由鼠标悬停驱动）
                         $script:DelArmed = [string]$btn.Tag
                         $script:DelArmedBtn = $btn
-                        try { $btn.Content = "确认删除？"; $btn.MinWidth = 84; $btn.Background = Brush "#D9534F"; $btn.Foreground = Brush "#FFFFFF"; $btn.BorderBrush = Brush "#D9534F" } catch { }
+                        try { $btn.Content = "确认删除？"; $btn.MinWidth = 84; $btn.Background = Brush "#D9534F"; $btn.Foreground = Tok 'AccentInk'; $btn.BorderBrush = Brush "#D9534F" } catch { }
                         return
                     }
                     $script:DelArmed = $null
@@ -1659,7 +1717,7 @@ function New-OutCard($f) {
                 }
                 $script:DelArmed = [string]$s.Tag
                 $script:DelArmedBtn = $s
-                try { $s.Content = "确认删除？"; $s.MinWidth = 84; $s.Background = Brush "#D9534F"; $s.Foreground = Brush "#FFFFFF"; $s.BorderBrush = Brush "#D9534F" } catch { }
+                try { $s.Content = "确认删除？"; $s.MinWidth = 84; $s.Background = Brush "#D9534F"; $s.Foreground = Tok 'AccentInk'; $s.BorderBrush = Brush "#D9534F" } catch { }
             })
             $b.Add_MouseLeave({
                 param($s, $e)
@@ -1684,7 +1742,7 @@ function Refresh-Products {
         if ($sig -eq $script:OutSig -and $script:out) { return }
         $script:OutSig = $sig
         $OutList.Children.Clear()
-        $OutTitle.Foreground = Brush $(if ($script:dark) { "#EAF1F8" } else { "#16283C" })
+        $OutTitle.Foreground = Tok 'Ink'
         $OutTitle.Text = "成品 · 按时间倒序"
         if ($files.Count -eq 0) {
             $tb = New-Object Windows.Controls.TextBlock
@@ -1830,7 +1888,7 @@ function Refresh-Collab {
         $empty = New-Object Windows.Controls.TextBlock
         $empty.Text = $(if ($script:cbView -eq "claim") { "现在没人占坑，两份代码可以并行改" } else { "这里还空着" })
         $empty.FontSize = 12.5
-        $empty.Foreground = Brush $(if ($script:dark) { "#6E8299" } else { "#9FB0C3" })
+        $empty.Foreground = Tok 'Hint'
         $empty.Margin = New-Object Windows.Thickness(16, 26, 0, 0)
         $CbList.Children.Add($empty) | Out-Null
         $CbCount.Text = ""
@@ -1879,9 +1937,8 @@ function Post-Collab {
 function Set-CbView([string]$v) {
     $script:cbView = $v
     # 26：不清 cbKey —— 签名已含 view/主题/条数/筛选，未变化时复用现有卡片
-    $active = @("#DCEBFC", "#12559E")
-    $idle = @("#FFFFFF", "#5A6E85")
-    if ($script:dark) { $active = @("#1E3A56", "#9CC3EE"); $idle = @("#22303F", "#AFC0D2") }
+    $active = @($script:UiTokens.CharSoft, $script:UiTokens.Accent)
+    $idle = @($script:UiTokens.Card, $script:UiTokens.Ink2)
     foreach ($pair in @(@("board", $CbBoard), @("log", $CbLog), @("claim", $CbClaim))) {
         $btn = $pair[1]
         $isOn = ($pair[0] -eq $v)
@@ -1895,7 +1952,7 @@ function Set-Collab([bool]$on) {
     $__sw = [Diagnostics.Stopwatch]::StartNew()
     if ($on) {
         Set-View 'collab'
-        $CbInputBar.BorderBrush = Brush $(if ($script:dark) { "#172432" } else { "#E1E9F1" })
+        $CbInputBar.BorderBrush = Tok 'SurfaceStroke'
     # 26：不清 cbKey —— 签名已含 view/主题/条数/筛选，未变化时复用现有卡片
         Set-CbView $script:cbView
         $script:cbSeen = $script:sendTotal
@@ -1957,8 +2014,8 @@ $win.Add_Loaded({
         [GlassFx]::EnableAcrylic($helper.Handle, $false)
         $src = [Windows.Interop.HwndSource]::FromHwnd($helper.Handle)
         if ($src) { $src.CompositionTarget.BackgroundColor = [Windows.Media.Colors]::Transparent }
-        $RootBorder.Background = Brush "#D9F4F9FF"
-        $RootBorder.BorderBrush = Brush "#D7E1EC"
+        $RootBorder.Background = Tok 'Surface'
+        $RootBorder.BorderBrush = Tok 'SurfaceStroke'
         try { $hh = (New-Object Windows.Interop.WindowInteropHelper($win)).Handle; if ($hh -ne [IntPtr]::Zero) { [GlassFx]::EnableAcrylic($hh, $false) } } catch { }
     } catch { }
     # ICON-01：头像与窗口图标拆成两次独立的 try，图标不再搭 PNG 那次的车（原先失败会一起被吞）

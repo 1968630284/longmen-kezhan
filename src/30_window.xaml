@@ -10,20 +10,71 @@
     <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6" CornerRadius="12" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
   </shell:WindowChrome.WindowChrome>
   <Window.Resources>
-    <sys:Double x:Key="FsCaption">10.5</sys:Double>
-    <sys:Double x:Key="FsMeta">11.5</sys:Double>
-    <sys:Double x:Key="FsBody">13</sys:Double>
-    <sys:Double x:Key="FsTitle">14.5</sys:Double>
+    <sys:Double x:Key="FsCaption">12</sys:Double>
+    <sys:Double x:Key="FsMeta">12</sys:Double>
+    <sys:Double x:Key="FsBody">14</sys:Double>
+    <sys:Double x:Key="FsTitle">14</sys:Double>
+    <sys:Double x:Key="FsDisplay">18</sys:Double>
+    <sys:Double x:Key="Space1">4</sys:Double>
+    <sys:Double x:Key="Space2">8</sys:Double>
+    <sys:Double x:Key="Space3">12</sys:Double>
+    <sys:Double x:Key="Space4">16</sys:Double>
+    <sys:Double x:Key="RadiusSm">4</sys:Double>
+    <sys:Double x:Key="RadiusMd">8</sys:Double>
+    <sys:Double x:Key="RadiusLg">12</sys:Double>
     <sys:String x:Key="FwSemiBold">SemiBold</sys:String>
-    <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="LineBrush" Color="#DCE4EE"/>
-    <SolidColorBrush x:Key="ThumbBrush" Color="#33000000"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{{Surface}}"/>
+    <SolidColorBrush x:Key="SurfaceStrokeBrush" Color="{{SurfaceStroke}}"/>
+    <SolidColorBrush x:Key="CardBrush" Color="{{Card}}"/>
+    <SolidColorBrush x:Key="SoftBrush" Color="{{Soft}}"/>
+    <SolidColorBrush x:Key="LineBrush" Color="{{Line}}"/>
+    <SolidColorBrush x:Key="StrokeBrush" Color="{{Stroke}}"/>
+    <SolidColorBrush x:Key="RailBrush" Color="{{Rail}}"/>
+    <SolidColorBrush x:Key="DashBrush" Color="{{Dash}}"/>
+    <SolidColorBrush x:Key="InkBrush" Color="{{Ink}}"/>
+    <SolidColorBrush x:Key="Ink2Brush" Color="{{Ink2}}"/>
+    <SolidColorBrush x:Key="MetaBrush" Color="{{Meta}}"/>
+    <SolidColorBrush x:Key="HintBrush" Color="{{Hint}}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{{Accent}}"/>
+    <SolidColorBrush x:Key="AccentInkBrush" Color="{{AccentInk}}"/>
+    <SolidColorBrush x:Key="FocusBrush" Color="{{Focus}}"/>
+    <SolidColorBrush x:Key="HoverBrush" Color="{{Hover}}"/>
+    <SolidColorBrush x:Key="PressedBrush" Color="{{Pressed}}"/>
+    <SolidColorBrush x:Key="ThumbBrush" Color="{{Thumb}}"/>
+    <SolidColorBrush x:Key="LiveGreenBrush" Color="{{LiveGreen}}"/>
+    <SolidColorBrush x:Key="LiveBadgeBgBrush" Color="{{LiveBadgeBg}}"/>
+    <SolidColorBrush x:Key="LiveBadgeLineBrush" Color="{{LiveBadgeLine}}"/>
+    <SolidColorBrush x:Key="LiveDotBrush" Color="{{LiveDot}}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{{Danger}}"/>
+    <SolidColorBrush x:Key="CloseRedBrush" Color="{{CloseRed}}"/>
+    <SolidColorBrush x:Key="ShadowBrush" Color="{{Shadow}}"/>
+    <SolidColorBrush x:Key="MyBgBrush" Color="{{MyBg}}"/>
+    <SolidColorBrush x:Key="MyLineBrush" Color="{{MyLine}}"/>
+    <SolidColorBrush x:Key="SelfBgBrush" Color="{{SelfBg}}"/>
+    <SolidColorBrush x:Key="SelfInkBrush" Color="{{SelfInk}}"/>
+    <SolidColorBrush x:Key="CharBrush" Color="{{Char}}"/>
+    <SolidColorBrush x:Key="CharSoftBrush" Color="{{CharSoft}}"/>
+    <SolidColorBrush x:Key="BgCatBrush" Color="{{BgCat}}"/>
+    <SolidColorBrush x:Key="BgSoftBrush" Color="{{BgSoft}}"/>
+    <SolidColorBrush x:Key="SceneBrush" Color="{{Scene}}"/>
+    <SolidColorBrush x:Key="SceneSoftBrush" Color="{{SceneSoft}}"/>
+    <SolidColorBrush x:Key="PromptBrush" Color="{{Prompt}}"/>
+    <SolidColorBrush x:Key="PromptSoftBrush" Color="{{PromptSoft}}"/>
+    <Style x:Key="FocusRing" TargetType="Control">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate>
+            <Rectangle Stroke="{StaticResource FocusBrush}" StrokeThickness="2" RadiusX="4" RadiusY="4" Margin="-2"/>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
     <Style x:Key="WinBtn" TargetType="Button">
       <Setter Property="Width" Value="44"/>
       <Setter Property="Height" Value="32"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="Foreground" Value="#3D4E63"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink2Brush}"/>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
@@ -32,10 +83,10 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="bd" Property="Background" Value="#14000000"/>
+                <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="bd" Property="Background" Value="#26000000"/>
+                <Setter TargetName="bd" Property="Opacity" Value="0.62"/>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -74,7 +125,7 @@
                   <Thumb>
                     <Thumb.Template>
                       <ControlTemplate TargetType="Thumb">
-                        <Border x:Name="tb" CornerRadius="4" Background="{DynamicResource ThumbBrush}" Opacity="0.45" Margin="1,0"/>
+                        <Border x:Name="tb" CornerRadius="4" Background="{StaticResource ThumbBrush}" Opacity="0.45" Margin="1,0"/>
                         <ControlTemplate.Triggers>
                           <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="tb" Property="Opacity" Value="1"/>
@@ -98,7 +149,7 @@
     </Style>
   <Style x:Key="UtilBtn" TargetType="Button">
       <Setter Property="FontSize" Value="12"/>
-      <Setter Property="Foreground" Value="#3D4E63"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink2Brush}"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template">
         <Setter.Value>
@@ -108,10 +159,10 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="bd" Property="Background" Value="#1A000000"/>
+                <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="bd" Property="Background" Value="#2A000000"/>
+                <Setter TargetName="bd" Property="Opacity" Value="0.62"/>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -123,9 +174,9 @@
       <Setter Property="Height" Value="36"/>
       <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets"/>
       <Setter Property="FontSize" Value="17"/>
-      <Setter Property="Foreground" Value="#5A6E85"/>
+      <Setter Property="Foreground" Value="{StaticResource Ink2Brush}"/>
       <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+      <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template">
         <Setter.Value>
@@ -135,10 +186,10 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="bd" Property="Background" Value="#E9F0F8"/>
+                <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="bd" Property="Background" Value="#DCE7F3"/>
+                <Setter TargetName="bd" Property="Opacity" Value="0.62"/>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -146,7 +197,7 @@
       </Setter>
     </Style>
   </Window.Resources>
-  <Border x:Name="RootBorder" CornerRadius="12" Background="#F2F7FB" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+  <Border x:Name="RootBorder" CornerRadius="12" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1">
     <Grid>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="52"/>
@@ -167,21 +218,21 @@
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock x:Name="TitleText" Text="龙门客栈" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="#16283C" VerticalAlignment="Center"/>
-          <Border x:Name="LiveBadge" CornerRadius="9" Background="#1A35C759" BorderBrush="#4D35C759" BorderThickness="1" Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+          <TextBlock x:Name="TitleText" Text="龙门客栈" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" VerticalAlignment="Center"/>
+          <Border x:Name="LiveBadge" CornerRadius="9" Background="{StaticResource LiveBadgeBgBrush}" BorderBrush="{StaticResource LiveBadgeLineBrush}" BorderThickness="1" Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-              <Ellipse x:Name="LiveDot" Width="6" Height="6" Fill="#35C759" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+              <Ellipse x:Name="LiveDot" Width="6" Height="6" Fill="{StaticResource LiveDotBrush}" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                 <Ellipse.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Ellipse.RenderTransform>
               </Ellipse>
-              <TextBlock x:Name="LiveBadgeText" Text="营业中" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#1E9E4A" Margin="4,0,0,0" VerticalAlignment="Center"/>
+              <TextBlock x:Name="LiveBadgeText" Text="营业中" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource LiveGreenBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
           </Border>
-          <TextBlock x:Name="StatusText" Text="" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#7A8CA3" Margin="10,0,0,0" VerticalAlignment="Center"/>
+          <TextBlock x:Name="StatusText" Text="" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource MetaBrush}" Margin="10,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
-        <Border x:Name="SearchBorder" Grid.Column="1" Width="0" CornerRadius="13" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
+        <Border x:Name="SearchBorder" Grid.Column="1" Width="0" CornerRadius="13" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
           <Grid>
-            <TextBox x:Name="SearchBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="#16283C" Padding="10,4" VerticalContentAlignment="Center"/>
-            <TextBlock x:Name="SearchHint" Text="搜索历史…" FontSize="{StaticResource FsMeta}" Foreground="#9FB0C3" Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+            <TextBox x:Name="SearchBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource InkBrush}" Padding="10,4" VerticalContentAlignment="Center"/>
+            <TextBlock x:Name="SearchHint" Text="搜索历史…" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource HintBrush}" Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
           </Grid>
         </Border>
         <Button x:Name="SearchBtn" Grid.Column="2" Style="{StaticResource IcoBtn}" Content="&#xE721;" FontSize="{StaticResource FsTitle}" Width="32" Height="32" Margin="0,0,4,0" ToolTip="搜索历史"/>
@@ -194,7 +245,7 @@
         <Button x:Name="BtnClose" Grid.Column="5" Style="{StaticResource CloseBtn}" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="关闭">
           <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
         </Button>
-        <Border x:Name="HeaderLine" Grid.ColumnSpan="6" VerticalAlignment="Bottom" Height="1" Background="#E1E9F1"/>
+        <Border x:Name="HeaderLine" Grid.ColumnSpan="6" VerticalAlignment="Bottom" Height="1" Background="{StaticResource RailBrush}"/>
       </Grid>
       <Grid x:Name="Rail" Grid.Column="0" Grid.RowSpan="3" Background="Transparent">
         <Grid.RowDefinitions>
@@ -215,7 +266,7 @@
           <Button x:Name="OutBtn" Style="{StaticResource IcoBtn}" Content="&#xE768;" ToolTip="成品（查看 / 删除）" Margin="0,2" HorizontalAlignment="Center"/>
           <Grid Width="36" Height="36" Margin="0,2" HorizontalAlignment="Center">
             <Button x:Name="CollabBtn" Style="{StaticResource IcoBtn}" Content="&#xE716;" ToolTip="传菜口（留言板 / 日志 / 占用）"/>
-            <Ellipse x:Name="CollabDot" Width="8" Height="8" Fill="#E5484D" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" Visibility="Collapsed"/>
+            <Ellipse x:Name="CollabDot" Width="8" Height="8" Fill="{StaticResource DangerBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" Visibility="Collapsed"/>
           </Grid>
           <Button x:Name="ArchiveBtn" Style="{StaticResource IcoBtn}" Content="&#xE74E;" ToolTip="存档（打包状态日志与记忆）" Margin="0,2" HorizontalAlignment="Center"/>
           <Button x:Name="ArchiveUndoBtn" Style="{StaticResource IcoBtn}" Content="&#xE7A7;" ToolTip="撤销最近一次存档（10 分钟内有效）" Margin="0,2" HorizontalAlignment="Center"/>
@@ -225,37 +276,37 @@
           <Button x:Name="ShotBtn" Style="{StaticResource IcoBtn}" Content="&#xE722;" ToolTip="给大厨看屏幕" Margin="0,2" HorizontalAlignment="Center"/>
           <Button x:Name="DarkBtn" Style="{StaticResource IcoBtn}" Content="&#xE706;" ToolTip="深浅色" Margin="0,2" HorizontalAlignment="Center"/>
         </StackPanel>
-        <Border x:Name="RailLine" HorizontalAlignment="Right" Width="1" Background="{DynamicResource LineBrush}"/>
+        <Border x:Name="RailLine" HorizontalAlignment="Right" Width="1" Background="{StaticResource LineBrush}"/>
       </Grid>
       <ScrollViewer x:Name="FeedScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="6,6,2,6">
         <StackPanel x:Name="FeedList"/>
       </ScrollViewer>
-      <Border x:Name="InputBar" Grid.Row="2" Grid.Column="1" BorderBrush="#E1E9F1" BorderThickness="0,1,0,0" Padding="14,12,14,14">
+      <Border x:Name="InputBar" Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource RailBrush}" BorderThickness="0,1,0,0" Padding="14,12,14,14">
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <Border x:Name="InputBorder" Grid.Column="0" CornerRadius="20" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,10,0">
+          <Border x:Name="InputBorder" Grid.Column="0" CornerRadius="20" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,10,0">
             <Grid>
-              <TextBox x:Name="InputBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsTitle}" Foreground="#16283C"
+              <TextBox x:Name="InputBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsTitle}" Foreground="{StaticResource InkBrush}"
                        Padding="13,9" VerticalContentAlignment="Center" MaxLength="500"/>
-              <TextBlock x:Name="InputHint" Text="跟掌柜说句话…" FontSize="{StaticResource FsTitle}" Foreground="#9FB0C3" Margin="14,0,0,0"
+              <TextBlock x:Name="InputHint" Text="跟掌柜说句话…" FontSize="{StaticResource FsTitle}" Foreground="{StaticResource HintBrush}" Margin="14,0,0,0"
                          VerticalAlignment="Center" IsHitTestVisible="False"/>
             </Grid>
           </Border>
           <Button x:Name="SendBtn" Grid.Column="1" Width="42" Height="42" Cursor="Hand" ToolTip="发给掌柜" VerticalAlignment="Center">
             <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border x:Name="bd" Background="#2F7DE1" CornerRadius="21" BorderBrush="#66FFFFFF" BorderThickness="1">
-                  <TextBlock Text="↑" FontSize="{StaticResource FsTitle}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border x:Name="bd" Background="{StaticResource AccentBrush}" CornerRadius="21" BorderBrush="#66FFFFFF" BorderThickness="1">
+                  <TextBlock Text="↑" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <ControlTemplate.Triggers>
                   <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="bd" Property="Background" Value="#4A90E8"/>
+                    <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
                   </Trigger>
                   <Trigger Property="IsPressed" Value="True">
-                    <Setter TargetName="bd" Property="Background" Value="#2569BC"/>
+                    <Setter TargetName="bd" Property="Opacity" Value="0.62"/>
                   </Trigger>
                 </ControlTemplate.Triggers>
               </ControlTemplate>
@@ -272,24 +323,24 @@
         </Grid.RowDefinitions>
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="6,4,2,4">
           <StackPanel Margin="10,4,10,6">
-            <Border x:Name="FlowBar" CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Padding="10,8" Margin="0,0,0,12">
+            <Border x:Name="FlowBar" CornerRadius="12" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Padding="10,8" Margin="0,0,0,12">
               <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Ellipse x:Name="FlowDotChar" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
-                <TextBlock Text="人物" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#1565C0" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                <TextBlock Text="→" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
-                <Ellipse x:Name="FlowDotScene" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
-                <TextBlock Text="场景" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#7B1FA2" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                <TextBlock Text="←" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
-                <Ellipse x:Name="FlowDotBg" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
-                <TextBlock Text="背景" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#2E7D32" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                <TextBlock Text="·" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
-                <Ellipse x:Name="FlowDotPrompt" Width="8" Height="8" Fill="#C3D2E2" VerticalAlignment="Center"/>
-                <TextBlock Text="提示词" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#C25E10" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                <TextBlock Text="→" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="7,0,7,0" VerticalAlignment="Center"/>
-                <TextBlock Text="生成" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#2F7DE1" VerticalAlignment="Center"/>
+                <Ellipse x:Name="FlowDotChar" Width="8" Height="8" Fill="{StaticResource DashBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="人物" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource CharBrush}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="→" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <Ellipse x:Name="FlowDotScene" Width="8" Height="8" Fill="{StaticResource DashBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="场景" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource SceneBrush}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="←" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <Ellipse x:Name="FlowDotBg" Width="8" Height="8" Fill="{StaticResource DashBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="背景" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource BgCatBrush}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="·" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <Ellipse x:Name="FlowDotPrompt" Width="8" Height="8" Fill="{StaticResource DashBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="提示词" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource PromptBrush}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock Text="→" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" Margin="7,0,7,0" VerticalAlignment="Center"/>
+                <TextBlock Text="生成" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center"/>
               </StackPanel>
             </Border>
-            <Border x:Name="NodeChar" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+            <Border x:Name="NodeChar" CornerRadius="14" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
               <Border.Effect>
                 <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
               </Border.Effect>
@@ -298,26 +349,26 @@
                   <RowDefinition Height="30"/>
                   <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border x:Name="BarChar" Grid.Row="0" Background="#DCEBFB" CornerRadius="14,14,0,0">
-                  <TextBlock x:Name="BarCharT" Text="人物 · 图片" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#1565C0" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                <Border x:Name="BarChar" Grid.Row="0" Background="{StaticResource CharSoftBrush}" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarCharT" Text="人物 · 图片" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource CharBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
                 </Border>
                 <Grid Grid.Row="1" Margin="10,8,10,10">
                   <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                   </Grid.RowDefinitions>
-                  <Border x:Name="DropChar" Grid.Row="0" Height="118" CornerRadius="10" Background="#F7FAFD" BorderBrush="#C3D2E2" BorderThickness="1" AllowDrop="True" Tag="char" Cursor="Hand">
+                  <Border x:Name="DropChar" Grid.Row="0" Height="118" CornerRadius="10" Background="{StaticResource SoftBrush}" BorderBrush="{StaticResource DashBrush}" BorderThickness="1" AllowDrop="True" Tag="char" Cursor="Hand">
                     <Grid>
-                      <Rectangle x:Name="DashChar" Margin="4" RadiusX="7" RadiusY="7" Stroke="#B9CBDE" StrokeThickness="1.1" StrokeDashArray="4,3"/>
-                      <TextBlock x:Name="HintChar" Text="把人物图片拖到这里，或点击选择" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <Rectangle x:Name="DashChar" Margin="4" RadiusX="7" RadiusY="7" Stroke="{StaticResource DashBrush}" StrokeThickness="1.1" StrokeDashArray="4,3"/>
+                      <TextBlock x:Name="HintChar" Text="把人物图片拖到这里，或点击选择" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                       <Image x:Name="ImgChar" Stretch="Uniform" Margin="2" Visibility="Collapsed" AllowDrop="True" Tag="char"/>
                     </Grid>
                   </Border>
-                  <TextBlock x:Name="NameChar" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
+                  <TextBlock x:Name="NameChar" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
                 </Grid>
               </Grid>
             </Border>
-            <Border x:Name="NodeBg" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+            <Border x:Name="NodeBg" CornerRadius="14" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
               <Border.Effect>
                 <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
               </Border.Effect>
@@ -326,26 +377,26 @@
                   <RowDefinition Height="30"/>
                   <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border x:Name="BarBg" Grid.Row="0" Background="#DFF2E2" CornerRadius="14,14,0,0">
-                  <TextBlock x:Name="BarBgT" Text="背景 · 图片" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#2E7D32" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                <Border x:Name="BarBg" Grid.Row="0" Background="{StaticResource BgSoftBrush}" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarBgT" Text="背景 · 图片" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource BgCatBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
                 </Border>
                 <Grid Grid.Row="1" Margin="10,8,10,10">
                   <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                   </Grid.RowDefinitions>
-                  <Border x:Name="DropBg" Grid.Row="0" Height="118" CornerRadius="10" Background="#F7FAFD" BorderBrush="#C3D2E2" BorderThickness="1" AllowDrop="True" Tag="bg" Cursor="Hand">
+                  <Border x:Name="DropBg" Grid.Row="0" Height="118" CornerRadius="10" Background="{StaticResource SoftBrush}" BorderBrush="{StaticResource DashBrush}" BorderThickness="1" AllowDrop="True" Tag="bg" Cursor="Hand">
                     <Grid>
-                      <Rectangle x:Name="DashBg" Margin="4" RadiusX="7" RadiusY="7" Stroke="#B9CBDE" StrokeThickness="1.1" StrokeDashArray="4,3"/>
-                      <TextBlock x:Name="HintBg" Text="把背景图片拖到这里，或点击选择" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <Rectangle x:Name="DashBg" Margin="4" RadiusX="7" RadiusY="7" Stroke="{StaticResource DashBrush}" StrokeThickness="1.1" StrokeDashArray="4,3"/>
+                      <TextBlock x:Name="HintBg" Text="把背景图片拖到这里，或点击选择" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                       <Image x:Name="ImgBg" Stretch="Uniform" Margin="2" Visibility="Collapsed" AllowDrop="True" Tag="bg"/>
                     </Grid>
                   </Border>
-                  <TextBlock x:Name="NameBg" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
+                  <TextBlock x:Name="NameBg" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
                 </Grid>
               </Grid>
             </Border>
-            <Border x:Name="NodeScene" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+            <Border x:Name="NodeScene" CornerRadius="14" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
               <Border.Effect>
                 <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
               </Border.Effect>
@@ -354,8 +405,8 @@
                   <RowDefinition Height="30"/>
                   <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border x:Name="BarScene" Grid.Row="0" Background="#EEE3F7" CornerRadius="14,14,0,0">
-                  <TextBlock x:Name="BarSceneT" Text="场景 · 合成" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#7B1FA2" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                <Border x:Name="BarScene" Grid.Row="0" Background="{StaticResource SceneSoftBrush}" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarSceneT" Text="场景 · 合成" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource SceneBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
                 </Border>
                 <Grid Grid.Row="1" Margin="10,8,10,10">
                   <Grid.RowDefinitions>
@@ -363,24 +414,24 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                   </Grid.RowDefinitions>
-                  <Border x:Name="DropScene" Grid.Row="0" Height="92" CornerRadius="10" Background="#F7FAFD" BorderBrush="#C3D2E2" BorderThickness="1" AllowDrop="True" Tag="scene" Cursor="Hand">
+                  <Border x:Name="DropScene" Grid.Row="0" Height="92" CornerRadius="10" Background="{StaticResource SoftBrush}" BorderBrush="{StaticResource DashBrush}" BorderThickness="1" AllowDrop="True" Tag="scene" Cursor="Hand">
                     <Grid>
-                      <Rectangle x:Name="DashScene" Margin="4" RadiusX="7" RadiusY="7" Stroke="#B9CBDE" StrokeThickness="1.1" StrokeDashArray="4,3"/>
-                      <TextBlock x:Name="HintScene" Text="把场景图片拖到这里（可空），或点击选择" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <Rectangle x:Name="DashScene" Margin="4" RadiusX="7" RadiusY="7" Stroke="{StaticResource DashBrush}" StrokeThickness="1.1" StrokeDashArray="4,3"/>
+                      <TextBlock x:Name="HintScene" Text="把场景图片拖到这里（可空），或点击选择" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                       <Image x:Name="ImgScene" Stretch="Uniform" Margin="2" Visibility="Collapsed" AllowDrop="True" Tag="scene"/>
                     </Grid>
                   </Border>
-                  <TextBlock x:Name="NameScene" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
-                  <Border Grid.Row="2" x:Name="SceneTextBorder" CornerRadius="7" Background="#F7FAFD" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,6,0,0">
+                  <TextBlock x:Name="NameScene" Grid.Row="1" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" Margin="2,5,0,0" TextTrimming="CharacterEllipsis"/>
+                  <Border Grid.Row="2" x:Name="SceneTextBorder" CornerRadius="7" Background="{StaticResource SoftBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,6,0,0">
                     <Grid>
-                      <TextBox x:Name="SceneText" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="#16283C" Padding="8,6" MaxLength="120"/>
-                      <TextBlock x:Name="SceneTextHint" Text="补充说明（可空）" FontSize="{StaticResource FsMeta}" Foreground="#9FB0C3" Margin="9,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                      <TextBox x:Name="SceneText" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource InkBrush}" Padding="8,6" MaxLength="120"/>
+                      <TextBlock x:Name="SceneTextHint" Text="补充说明（可空）" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource HintBrush}" Margin="9,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
                     </Grid>
                   </Border>
                 </Grid>
               </Grid>
             </Border>
-            <Border x:Name="NodePrompt" CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+            <Border x:Name="NodePrompt" CornerRadius="14" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
               <Border.Effect>
                 <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.07" Color="#33507A"/>
               </Border.Effect>
@@ -389,19 +440,19 @@
                   <RowDefinition Height="30"/>
                   <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border x:Name="BarPrompt" Grid.Row="0" Background="#FDEBD8" CornerRadius="14,14,0,0">
-                  <TextBlock x:Name="BarPromptT" Text="提示词 · 文字" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="#C25E10" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                <Border x:Name="BarPrompt" Grid.Row="0" Background="{StaticResource PromptSoftBrush}" CornerRadius="14,14,0,0">
+                  <TextBlock x:Name="BarPromptT" Text="提示词 · 文字" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource PromptBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
                 </Border>
                 <Grid Grid.Row="1" Margin="10,8,10,10">
                   <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                   </Grid.RowDefinitions>
-                  <ComboBox x:Name="StyleBox" Grid.Row="0" Height="30" FontSize="{StaticResource FsMeta}" IsEditable="True" VerticalContentAlignment="Center" Padding="6,0" Background="#F7FAFD" Foreground="#16283C"/>
-                  <Border x:Name="PromptBorder" Grid.Row="1" Height="88" CornerRadius="7" Background="#F7FAFD" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,8,0,0">
+                  <ComboBox x:Name="StyleBox" Grid.Row="0" Height="30" FontSize="{StaticResource FsMeta}" IsEditable="True" VerticalContentAlignment="Center" Padding="6,0" Background="{StaticResource SoftBrush}" Foreground="{StaticResource InkBrush}"/>
+                  <Border x:Name="PromptBorder" Grid.Row="1" Height="88" CornerRadius="7" Background="{StaticResource SoftBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,8,0,0">
                     <Grid>
-                      <TextBox x:Name="PromptText" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="#16283C" Padding="8,6" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
-                      <TextBlock x:Name="PromptHint" Text="写动作 / 剧情，比如：奶龙在茶园小路上奔跑，脚下一滑，闭眼摔出画面…" FontSize="{StaticResource FsMeta}" Foreground="#9FB0C3" Margin="9,7,6,0" TextWrapping="Wrap" IsHitTestVisible="False"/>
+                      <TextBox x:Name="PromptText" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource InkBrush}" Padding="8,6" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                      <TextBlock x:Name="PromptHint" Text="写动作 / 剧情，比如：奶龙在茶园小路上奔跑，脚下一滑，闭眼摔出画面…" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource HintBrush}" Margin="9,7,6,0" TextWrapping="Wrap" IsHitTestVisible="False"/>
                     </Grid>
                   </Border>
                 </Grid>
@@ -409,22 +460,22 @@
             </Border>
             </StackPanel>
         </ScrollViewer>
-        <Border x:Name="VsStatusBar" Grid.Row="1" BorderBrush="#E1E9F1" BorderThickness="0,1,0,0" Padding="14,9,14,7">
-          <TextBlock x:Name="VsStatus" Text="等待素材 · 还差人物、背景" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" TextWrapping="Wrap"/>
+        <Border x:Name="VsStatusBar" Grid.Row="1" BorderBrush="{StaticResource RailBrush}" BorderThickness="0,1,0,0" Padding="14,9,14,7">
+          <TextBlock x:Name="VsStatus" Text="等待素材 · 还差人物、背景" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
         </Border>
         <Border Grid.Row="2" Padding="14,2,14,14">
           <Button x:Name="GenBtn" Content="生成视频" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="White" Height="46" Cursor="Hand">
             <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border x:Name="bd" Background="#2F7DE1" CornerRadius="14" BorderBrush="#66FFFFFF" BorderThickness="1">
+                <Border x:Name="bd" Background="{StaticResource AccentBrush}" CornerRadius="14" BorderBrush="#66FFFFFF" BorderThickness="1">
                   <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <ControlTemplate.Triggers>
                   <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="bd" Property="Background" Value="#4A90E8"/>
+                    <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
                   </Trigger>
                   <Trigger Property="IsPressed" Value="True">
-                    <Setter TargetName="bd" Property="Background" Value="#2569BC"/>
+                    <Setter TargetName="bd" Property="Opacity" Value="0.62"/>
                   </Trigger>
                 </ControlTemplate.Triggers>
               </ControlTemplate>
@@ -443,7 +494,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <TextBlock x:Name="OutTitle" Text="成品 · 按时间倒序" FontSize="{StaticResource FsBody}" FontWeight="SemiBold" Foreground="#16283C" VerticalAlignment="Center"/>
+          <TextBlock x:Name="OutTitle" Text="成品 · 按时间倒序" FontSize="{StaticResource FsBody}" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" VerticalAlignment="Center"/>
           <Button x:Name="OutRefresh" Grid.Column="1" Style="{StaticResource UtilBtn}" Content="刷新" MinWidth="64" Padding="14,4"/>
         </Grid>
         <ScrollViewer x:Name="OutScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8,0,6,10">
@@ -468,13 +519,13 @@
           <Button x:Name="CbBoard" Grid.Column="0" Style="{StaticResource UtilBtn}" Content="留言板"/>
           <Button x:Name="CbLog" Grid.Column="1" Style="{StaticResource UtilBtn}" Content="动作日志" Margin="8,0,0,0"/>
           <Button x:Name="CbClaim" Grid.Column="2" Style="{StaticResource UtilBtn}" Content="占用" Margin="8,0,0,0"/>
-          <TextBlock x:Name="CbCount" Grid.Column="4" FontSize="{StaticResource FsMeta}" Foreground="#8496AB" VerticalAlignment="Center"/>
+          <TextBlock x:Name="CbCount" Grid.Column="4" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" VerticalAlignment="Center"/>
         </Grid>
         <!-- 54 号：优先级图例整行撤除（档位圆点与气泡胶囊保留） -->
         <ScrollViewer x:Name="CbScroll" Grid.Row="2" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="8,0,4,8">
           <StackPanel x:Name="CbList"/>
         </ScrollViewer>
-        <Border x:Name="CbInputBar" Grid.Row="3" BorderBrush="#E1E9F1" BorderThickness="0,1,0,0" Padding="14,10,14,12">
+        <Border x:Name="CbInputBar" Grid.Row="3" BorderBrush="{StaticResource RailBrush}" BorderThickness="0,1,0,0" Padding="14,10,14,12">
           <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
@@ -482,9 +533,9 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Border x:Name="CbInputBorder" Grid.Column="0" CornerRadius="18" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" Margin="0,0,8,0">
+            <Border x:Name="CbInputBorder" Grid.Column="0" CornerRadius="18" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,8,0">
               <Grid>
-                <TextBox x:Name="CbInput" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsBody}" Foreground="#16283C" Padding="12,8" MaxLength="1000">
+                <TextBox x:Name="CbInput" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsBody}" Foreground="{StaticResource InkBrush}" Padding="12,8" MaxLength="1000">
                   <TextBox.ContextMenu>
                     <ContextMenu>
                       <MenuItem Header="剪切" Command="ApplicationCommands.Cut"/>
@@ -495,7 +546,7 @@
                     </ContextMenu>
                   </TextBox.ContextMenu>
                 </TextBox>
-                <TextBlock x:Name="CbHint" Text="发到留言板，两个助手下一轮都会看到" FontSize="{StaticResource FsBody}" Foreground="#9FB0C3" Margin="13,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                <TextBlock x:Name="CbHint" Text="发到留言板，两个助手下一轮都会看到" FontSize="{StaticResource FsBody}" Foreground="{StaticResource HintBrush}" Margin="13,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
               </Grid>
             </Border>
             <Button x:Name="CbTo" Grid.Column="1" Style="{StaticResource UtilBtn}" Content="发给：全员" ToolTip="点击切换收件人：全员 / 掌柜 / 大厨 / 客官" Margin="0,0,6,0"/>
@@ -503,15 +554,15 @@
             <Button x:Name="CbSend" Grid.Column="3" Content="发到看板" FontSize="{StaticResource FsBody}" FontWeight="SemiBold" Foreground="White" Padding="16,7" Cursor="Hand">
               <Button.Template>
                 <ControlTemplate TargetType="Button">
-                  <Border x:Name="bd" Background="#2F7DE1" CornerRadius="17">
+                  <Border x:Name="bd" Background="{StaticResource AccentBrush}" CornerRadius="17">
                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                   </Border>
                   <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter TargetName="bd" Property="Background" Value="#4A90E8"/>
+                      <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
                     </Trigger>
                     <Trigger Property="IsPressed" Value="True">
-                      <Setter TargetName="bd" Property="Background" Value="#2569BC"/>
+                      <Setter TargetName="bd" Property="Opacity" Value="0.62"/>
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>

@@ -4,12 +4,14 @@ param(
     [switch]$NoMutex,
     [switch]$DebugFeed
 )
-# 57 号：字体令牌区（唯一来源；其余处只引用令牌，不写字面量）
+# 57 号 / UI-01：字体令牌区。这里只是启动期占位，
+# 窗口解析后会由 40_app.ps1 从 30_window.xaml 的 <sys:Double> 令牌覆盖，保证两套字号不分叉。
 $script:FontFamilyName = "Microsoft YaHei UI, Segoe UI"
-$script:FsCaption = 10.5   # 说明/角标
-$script:FsMeta = 11.5      # 元信息/时间/名字/胶囊
-$script:FsBody = 13        # 正文
-$script:FsTitle = 14.5     # 标题
+$script:FsCaption = 12    # 说明/角标
+$script:FsMeta = 12       # 元信息/时间/名字/胶囊
+$script:FsBody = 14       # 正文
+$script:FsTitle = 14      # 标题（层级靠 Semibold 字重区分）
+$script:FsDisplay = 18    # 大标题
 $script:FwRegular = "Normal"
 $script:FwSemiBold = "SemiBold"
 # 57-补：XAML 侧用的四个 Double 令牌（与上面同值）
@@ -125,4 +127,61 @@ try { Log-Boot 'csharp-done' } catch { }
 try { [void][TaskbarId]::SetCurrentProcessExplicitAppUserModelID("Nailong.Workshop.Live") } catch { }
 
 $Utf8 = New-Object Text.UTF8Encoding $false
+
+# ===== UI-01：全局语义色板（唯一颜色数据源）=====
+# 四个探针证实：XamlReader.Parse 场景下，模板内 DynamicResource 换字典项会求值失败、
+# 资源画刷会被自动 Freeze、ControlTemplate 的 Setter 密封不可写。因此这里不依赖运行时
+# 换资源：XAML 在启动期用 Resolve-UiXaml 注入当前主题色；运行时由 Apply-Theme 遍历
+# 具名控件从同一色板取值；交互态统一用主题无关的 Opacity 反馈。
+# 所有色值经 WCAG 相对亮度公式验算：正文 >=4.5:1、组件描边 >=3:1。
+$script:UiLight = @{
+    Surface = '#D9F4F9FF'; SurfaceStroke = '#D7E1EC'; Card = '#FFFFFF'; Soft = '#F7FAFD'
+    Line = '#D7E1EC'; Stroke = '#7A8CA3'; Rail = '#E1E9F1'; Dash = '#B9CBDE'
+    Ink = '#16283C'; Ink2 = '#3D4E63'; Meta = '#5F6E80'; Hint = '#64748B'
+    Accent = '#185FA5'; AccentInk = '#FFFFFF'; Focus = '#185FA5'
+    Hover = '#EAF1F8'; Pressed = '#DCE7F3'; Thumb = '#33000000'
+    LiveGreen = '#1E9E4A'; LiveBadgeBg = '#1A35C759'; LiveBadgeLine = '#4D35C759'; LiveDot = '#35C759'
+    Danger = '#E5484D'; CloseRed = '#E81123'; Shadow = '#33507A'
+    MyBg = '#FFFFFF'; MyLine = '#E2EAF2'; SelfBg = '#185FA5'; SelfInk = '#FFFFFF'
+    Char = '#1565C0'; CharSoft = '#DCEBFB'
+    BgCat = '#2E7D32'; BgSoft = '#DFF2E2'
+    Scene = '#7B1FA2'; SceneSoft = '#EEE3F7'
+    Prompt = '#C25E10'; PromptSoft = '#FDEBD8'
+}
+$script:UiDark = @{
+    Surface = '#F2172432'; SurfaceStroke = '#172432'; Card = '#22303F'; Soft = '#1B2836'
+    Line = '#1E2A38'; Stroke = '#6B829B'; Rail = '#1E2A38'; Dash = '#46586E'
+    Ink = '#EAF1F8'; Ink2 = '#AFC0D2'; Meta = '#93A8BE'; Hint = '#93A8BE'
+    Accent = '#2563B8'; AccentInk = '#FFFFFF'; Focus = '#7FB0EA'
+    Hover = '#2A3B4F'; Pressed = '#31465C'; Thumb = '#66FFFFFF'
+    LiveGreen = '#4ADE80'; LiveBadgeBg = '#2B35C759'; LiveBadgeLine = '#6635C759'; LiveDot = '#4ADE80'
+    Danger = '#E5484D'; CloseRed = '#E81123'; Shadow = '#000000'
+    MyBg = '#22303F'; MyLine = '#3A4E66'; SelfBg = '#2563B8'; SelfInk = '#FFFFFF'
+    Char = '#9CC3EE'; CharSoft = '#1E3A56'
+    BgCat = '#9AD3A5'; BgSoft = '#1E4030'
+    Scene = '#D3A8EE'; SceneSoft = '#39264D'
+    Prompt = '#F2C184'; PromptSoft = '#4D3418'
+}
+function Set-UiTheme([bool]$dark) {
+    $script:dark = $dark
+    $script:UiTokens = if ($dark) { $script:UiDark } else { $script:UiLight }
+}
+# 主题在窗口解析前就确定，避免先用浅色 XAML 再整体改色造成闪烁
+$script:dark = $false
+try { $script:dark = ([IO.File]::ReadAllText("D:\tmp\live_theme.txt", [Text.Encoding]::UTF8).Trim() -eq "True") } catch { }
+Set-UiTheme $script:dark
+
+# 供 PowerShell 构造的控件取色（气泡、拖拽区、时间线等）
+function Tok([string]$key) {
+    $v = $script:UiTokens[$key]
+    if (-not $v) { $v = '#888888' }
+    return (Brush $v)
+}
+# 启动期把 XAML 资源字典里的 {{Key}} 占位符替换为当前主题色
+function Resolve-UiXaml([string]$x) {
+    foreach ($k in @($script:UiTokens.Keys)) {
+        $x = $x.Replace('{{' + $k + '}}', [string]$script:UiTokens[$k])
+    }
+    return $x
+}
 
