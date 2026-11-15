@@ -25,17 +25,9 @@ Windows 10/11 免安装：[最新绿色包](https://github.com/1968630284/longme
 
 这套东西最初的用法不在电脑前：人在手机上发一句话，云端/本地的 DSH agent 就去板子上取单干活。
 
-```
-手机微信 ──(随手一句话)──▶ dsh-plugin-weixin
-                              │ 开一个回合
-                              ▼
-                        dsh-bus-bridge
-                  （回合结束时扫板上的待办单）
-                              │ 只投一行：「有 2 单待办，单号 48 / 49」
-                              ▼
-                          DSH agent
-                bus_inbox 按单号取正文 → 干活 → bus_post 回报
-```
+![微信 → 总线 → DSH 示意图](docs/images/dispatch-flow.svg)
+
+*示意图：界面元素为示意，不是真实聊天截图。*
 
 关键设计：
 

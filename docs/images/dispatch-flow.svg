@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" font-family="Microsoft YaHei UI, Microsoft YaHei, Segoe UI, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F6E80"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#185FA5"/>
+    </marker>
+    <marker id="arrowStart" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 10 0 L 0 5 L 10 10 z" fill="#185FA5"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="640" fill="#F7FAFD"/>
+
+  <text x="48" y="54" font-size="22" font-weight="600" fill="#16283C">一条指令的路径：微信 → 总线 → DSH</text>
+  <text x="48" y="82" font-size="13" fill="#5F6E80">唤醒消息里只有单号；正文留在板上，agent 按号自取。</text>
+
+  <!-- 手机 -->
+  <rect x="48" y="116" width="248" height="392" rx="28" fill="#FFFFFF" stroke="#D7E1EC" stroke-width="1.5"/>
+  <rect x="140" y="128" width="64" height="6" rx="3" fill="#E1E9F1"/>
+  <text x="172" y="164" font-size="13" fill="#5F6E80" text-anchor="middle">微信</text>
+
+  <rect x="160" y="184" width="112" height="46" rx="14" fill="#185FA5"/>
+  <text x="216" y="213" font-size="17" font-weight="600" fill="#FFFFFF" text-anchor="middle">48</text>
+
+  <rect x="72" y="248" width="152" height="46" rx="14" fill="#F2F6FB" stroke="#D7E1EC"/>
+  <text x="148" y="276" font-size="14" fill="#16283C" text-anchor="middle">收到，开工</text>
+
+  <rect x="72" y="308" width="196" height="46" rx="14" fill="#F2F6FB" stroke="#D7E1EC"/>
+  <text x="170" y="336" font-size="13" fill="#16283C" text-anchor="middle">48 收到，先做核心层</text>
+
+  <text x="172" y="392" font-size="12" fill="#5F6E80" text-anchor="middle">微信只负责传话</text>
+  <text x="172" y="414" font-size="12" fill="#5F6E80" text-anchor="middle">不算正式记录</text>
+
+  <text x="172" y="470" font-size="12" fill="#185FA5" text-anchor="middle">只发单号也行</text>
+  <text x="172" y="488" font-size="12" fill="#5F6E80" text-anchor="middle">不用在微信里写需求</text>
+
+  <!-- 桥 -->
+  <rect x="356" y="170" width="300" height="152" rx="16" fill="#FFFFFF" stroke="#D7E1EC" stroke-width="1.5"/>
+  <text x="380" y="202" font-size="15" font-weight="600" fill="#16283C">dsh-bus-bridge</text>
+  <text x="380" y="226" font-size="12" fill="#5F6E80">回合结束时扫一遍板</text>
+  <text x="380" y="256" font-size="13" fill="#16283C">投递：有 2 单待办</text>
+  <text x="380" y="282" font-size="15" font-weight="600" fill="#185FA5">单号 48 / 49</text>
+  <text x="380" y="306" font-size="12" fill="#5F6E80">正文不入消息</text>
+
+  <line x1="298" y1="250" x2="350" y2="250" stroke="#5F6E80" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="324" y="238" font-size="11" fill="#5F6E80" text-anchor="middle">① 开回合</text>
+
+  <!-- agent -->
+  <rect x="740" y="150" width="320" height="200" rx="16" fill="#FFFFFF" stroke="#D7E1EC" stroke-width="1.5"/>
+  <text x="764" y="184" font-size="15" font-weight="600" fill="#16283C">DSH agent</text>
+  <text x="764" y="216" font-size="13" fill="#16283C">· bus_inbox 按单号取正文</text>
+  <text x="764" y="244" font-size="13" fill="#16283C">· 只做被点名的单</text>
+  <text x="764" y="272" font-size="13" fill="#16283C">· bus_post 回报结果</text>
+  <rect x="764" y="294" width="132" height="30" rx="15" fill="#E8F1FB"/>
+  <text x="830" y="314" font-size="12" fill="#185FA5" text-anchor="middle">少想，多做</text>
+
+  <line x1="656" y1="246" x2="734" y2="246" stroke="#5F6E80" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="696" y="234" font-size="11" fill="#5F6E80" text-anchor="middle">② 只递单号</text>
+
+  <!-- 总线 -->
+  <rect x="356" y="400" width="470" height="160" rx="16" fill="#FFFFFF" stroke="#D7E1EC" stroke-width="1.5"/>
+  <text x="380" y="432" font-size="15" font-weight="600" fill="#16283C">board.jsonl</text>
+  <text x="380" y="462" font-size="13" fill="#16283C">48 · 传菜口状态化，先做核心层 1/2</text>
+  <text x="380" y="490" font-size="13" fill="#16283C">49 · 快车道：轮询兜底 + 增量游标</text>
+  <text x="380" y="522" font-size="12" fill="#5F6E80">正文留在这里；已投递的 id 记录在案，不会重投</text>
+  <text x="380" y="544" font-size="12" fill="#5F6E80">电脑窗口与手机看到的是同一份记录</text>
+
+  <line x1="800" y1="352" x2="800" y2="396" stroke="#185FA5" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrowAccent)" marker-start="url(#arrowStart)"/>
+  <text x="812" y="378" font-size="11" fill="#185FA5">③ 取正文 / ④ 回报</text>
+
+  <text x="48" y="612" font-size="12" fill="#5F6E80">微信只是管道；agent 的每个回合都以「先看板子」开始，所以一条单号就能驱动一次执行。</text>
+</svg>
