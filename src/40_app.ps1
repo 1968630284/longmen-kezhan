@@ -140,6 +140,23 @@ function Apply-Theme {
     # UI-01：主题只换一层。颜色统一取自 00_header.ps1 的 $script:UiTokens，
     # 不再在深浅两个分支里各写一遍 hex。交互态已改为主题无关的 Opacity 反馈。
     Set-UiTheme $script:dark
+    # UI-05：运行时切换只需重置资源字典里画刷的 Color。XamlReader.Parse 场景下
+    # StaticResource 解析后，所有引用者（含 ControlTemplate 内、未具名元素）持有
+    # 同一个未冻结的画刷对象，改 Color 即全窗口同步换色。这补上了此前「具名控件
+    # 映射表」漏掉 Rail / 未具名元素导致深浅切换后侧栏仍是白底的根因。
+    # 探针：probe_resource_identity.ps1 / probe_resource_recolor.ps1 已验证。
+    try {
+        foreach ($rk in @($win.Resources.Keys)) {
+            if ($rk -match '^([A-Za-z0-9]+)Brush$') {
+                $tk = $matches[1]
+                $rb = $win.Resources[$rk]
+                if ($script:UiTokens.ContainsKey($tk) -and
+                    $rb -is [Windows.Media.SolidColorBrush] -and -not $rb.IsFrozen) {
+                    $rb.Color = [Windows.Media.ColorConverter]::ConvertFromString([string]$script:UiTokens[$tk])
+                }
+            }
+        }
+    } catch { }
     $uiMap = @(
         ,@('RootBorder',    'Background',  'Surface')
         ,@('RootBorder',    'BorderBrush', 'SurfaceStroke')
@@ -155,13 +172,13 @@ function Apply-Theme {
         ,@('LiveDot',       'Fill',        'LiveDot')
         ,@('InputBox',      'Foreground',  'Ink')
         ,@('InputHint',     'Foreground',  'Hint')
-        ,@('InputBorder',   'Background',  'Card')
+        ,@('InputBorder',   'Background',  'Input')
         ,@('InputBorder',   'BorderBrush', 'Stroke')
-        ,@('SearchBorder',  'Background',  'Card')
+        ,@('SearchBorder',  'Background',  'Input')
         ,@('SearchBorder',  'BorderBrush', 'Stroke')
         ,@('SearchBox',     'Foreground',  'Ink')
         ,@('SearchHint',    'Foreground',  'Hint')
-        ,@('CbInputBorder', 'Background',  'Card')
+        ,@('CbInputBorder', 'Background',  'Input')
         ,@('CbInputBorder', 'BorderBrush', 'Stroke')
     # UI-01：由 src/30_window.xaml 自动提取，覆盖工坊 / 传菜口 / 协作台等具名控件
         ,@('tb', 'Background', 'Thumb')
@@ -311,7 +328,7 @@ function Apply-StudioTheme {
 }
 $DarkBtn.Add_Click({
     $script:dark = -not $script:dark
-    try { [IO.File]::WriteAllText("D:\tmp\live_theme.txt", $script:dark.ToString(), [Text.Encoding]::UTF8) } catch { }
+    try { [IO.File]::WriteAllText("D:\tmp\live_theme.txt", $script:dark.ToString(), $Utf8) } catch { }
     try { Apply-Theme } catch { try { [IO.File]::AppendAllText("D:\tmp\theme_err.txt", ((Get-Date -Format "HH:mm:ss") + " Apply-Theme 失败：" + $_.Exception.Message + "`r`nSTACK:" + $_.ScriptStackTrace + "`r`n"), [Text.Encoding]::UTF8) } catch { } }
     $script:forceRefresh = $true
     Refresh-Feed
@@ -510,13 +527,13 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     if (-not $Compact) { $content.Children.Add($meta) | Out-Null }
 
     $bubble = New-Object Windows.Controls.Border
-    $bubble.MaxWidth = 340
-    $bubble.Padding = New-Object Windows.Thickness(12, 8, 12, 8)
-    $bubble.CornerRadius = New-Object Windows.CornerRadius(10)
+    $bubble.MaxWidth = 360
+    $bubble.Padding = New-Object Windows.Thickness(14, 9, 14, 9)
+    $bubble.CornerRadius = New-Object Windows.CornerRadius(12)
     $bgc = if ($isSelf) { $script:UiTokens.SelfBg } else { $script:UiTokens.Card }
     $bubble.Background = Brush $bgc
     $bubble.BorderBrush = Tok 'Line'
-    $bubble.BorderThickness = New-Object Windows.Thickness(1)
+    $bubble.BorderThickness = New-Object Windows.Thickness(0)
     # UI-03：移除逐条气泡投影，改由底色层次 + 留白表达分组（对齐 Teams / 飞书的克制做法）
 
     $inner = New-Object Windows.Controls.StackPanel
@@ -559,7 +576,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     }
     $fg = if ($isSelf) { $script:UiTokens.SelfInk } else { $script:UiTokens.Ink }
     $body = New-SelectableText ([string]$Text) $script:FsBody (Brush $fg) 20 $bgc
-    $body.MaxWidth = 312
+    $body.MaxWidth = 330
     $inner.Children.Add($body) | Out-Null
     $bubble.Child = $inner
     $content.Children.Add($bubble) | Out-Null
@@ -1511,7 +1528,7 @@ function Update-Rail {
                 $b.BorderThickness = New-Object Windows.Thickness(0)
             }
         }
-        foreach ($b in @($BtnChat, $StudioBtn, $OutBtn, $CollabBtn, $ArchiveBtn, $ArchiveUndoBtn, $BootCopyBtn)) { if ($b) { $b.Foreground = Brush $fg } }
+        foreach ($b in @($BtnChat, $StudioBtn, $OutBtn, $CollabBtn, $ArchiveBtn, $ArchiveUndoBtn, $BootCopyBtn, $ShotBtn, $DarkBtn)) { if ($b) { $b.Foreground = Brush $fg } }
         if ($script:ViewW -and ($win.Width -ne $script:ViewW -or $win.Height -ne $script:ViewH)) { $win.Width = $script:ViewW; $win.Height = $script:ViewH }
     } catch { }
 }

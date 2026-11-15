@@ -135,9 +135,9 @@ $Utf8 = New-Object Text.UTF8Encoding $false
 # 具名控件从同一色板取值；交互态统一用主题无关的 Opacity 反馈。
 # 所有色值经 WCAG 相对亮度公式验算：正文 >=4.5:1、组件描边 >=3:1。
 $script:UiLight = @{
-    Surface = '#FFFFFF'; SurfaceStroke = '#D7E1EC'; Card = '#FFFFFF'; Soft = '#F7FAFD'
+    Surface = '#FFFFFF'; SurfaceStroke = '#D7E1EC'; Card = '#FFFFFF'; Soft = '#F7FAFD'; Input = '#F2F6FB'
     Line = '#D7E1EC'; Stroke = '#7A8CA3'; Rail = '#E1E9F1'; Dash = '#B9CBDE'
-    Ink = '#16283C'; Ink2 = '#3D4E63'; Meta = '#5F6E80'; Hint = '#64748B'
+    Ink = '#16283C'; Ink2 = '#3D4E63'; Meta = '#5F6E80'; Hint = '#5F6E80'
     Accent = '#185FA5'; AccentInk = '#FFFFFF'; Focus = '#185FA5'
     Hover = '#EAF1F8'; Pressed = '#DCE7F3'; Thumb = '#33000000'
     LiveGreen = '#1E9E4A'; LiveBadgeBg = '#1A35C759'; LiveBadgeLine = '#4D35C759'; LiveDot = '#35C759'
@@ -150,7 +150,7 @@ $script:UiLight = @{
     RoleSelf = '#4A5A72'; RoleHost = '#2E5A8A'; RoleGpt = '#6B4A8A'; RoleChef = '#2E6B4A'; RoleUnknown = '#5A6B82'
 }
 $script:UiDark = @{
-    Surface = '#F2172432'; SurfaceStroke = '#172432'; Card = '#22303F'; Soft = '#1B2836'
+    Surface = '#F2172432'; SurfaceStroke = '#172432'; Card = '#22303F'; Soft = '#1B2836'; Input = '#1C2C3E'
     Line = '#1E2A38'; Stroke = '#6B829B'; Rail = '#1E2A38'; Dash = '#46586E'
     Ink = '#EAF1F8'; Ink2 = '#AFC0D2'; Meta = '#93A8BE'; Hint = '#93A8BE'
     Accent = '#2563B8'; AccentInk = '#FFFFFF'; Focus = '#7FB0EA'

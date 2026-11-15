@@ -4,7 +4,7 @@
         Title="龙门客栈" Width="620" Height="740" MinWidth="520" MinHeight="560"
         WindowStyle="None" ResizeMode="CanResize" ShowInTaskbar="True"
         WindowStartupLocation="CenterScreen" Background="Transparent"
-        FontFamily="Microsoft YaHei UI, Segoe UI" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType"
+        FontFamily="Microsoft YaHei UI, Segoe UI, Segoe UI Emoji" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType"
         UseLayoutRounding="True" SnapsToDevicePixels="True">
   <shell:WindowChrome.WindowChrome>
     <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6" CornerRadius="12" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
@@ -27,6 +27,7 @@
     <SolidColorBrush x:Key="SurfaceStrokeBrush" Color="{{SurfaceStroke}}"/>
     <SolidColorBrush x:Key="CardBrush" Color="{{Card}}"/>
     <SolidColorBrush x:Key="SoftBrush" Color="{{Soft}}"/>
+    <SolidColorBrush x:Key="InputBrush" Color="{{Input}}"/>
     <SolidColorBrush x:Key="LineBrush" Color="{{Line}}"/>
     <SolidColorBrush x:Key="StrokeBrush" Color="{{Stroke}}"/>
     <SolidColorBrush x:Key="RailBrush" Color="{{Rail}}"/>
@@ -228,7 +229,7 @@
       </Setter>
     </Style>
   </Window.Resources>
-  <Border x:Name="RootBorder" CornerRadius="12" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1">
+  <Border x:Name="RootBorder" CornerRadius="12" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0">
     <Grid>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="156"/>
@@ -250,7 +251,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
           <TextBlock x:Name="TitleText" Text="龙门客栈" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" VerticalAlignment="Center"/>
-          <Border x:Name="LiveBadge" CornerRadius="6" Background="{StaticResource LiveBadgeBgBrush}" BorderThickness="0" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+          <Border x:Name="LiveBadge" CornerRadius="999" Background="{StaticResource LiveBadgeBgBrush}" BorderThickness="0" Padding="7,3" Margin="8,0,0,0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
               <Ellipse x:Name="LiveDot" Width="6" Height="6" Fill="{StaticResource LiveDotBrush}" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                 <Ellipse.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Ellipse.RenderTransform>
@@ -258,9 +259,9 @@
               <TextBlock x:Name="LiveBadgeText" Text="营业中" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource LiveGreenBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
           </Border>
-          <TextBlock x:Name="StatusText" Text="" FontSize="{StaticResource FsCaption}" FontWeight="Normal" Foreground="{StaticResource HintBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
+          <TextBlock x:Name="StatusText" Text="" FontSize="{StaticResource FsCaption}" FontWeight="Normal" Foreground="{StaticResource HintBrush}" Margin="12,0,0,0" VerticalAlignment="Center" Visibility="Collapsed"/>
         </StackPanel>
-        <Border x:Name="SearchBorder" Grid.Column="1" Width="0" CornerRadius="13" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
+        <Border x:Name="SearchBorder" Grid.Column="1" Width="0" CornerRadius="13" Background="{StaticResource InputBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
           <Grid>
             <TextBox x:Name="SearchBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource InkBrush}" Padding="10,4" VerticalContentAlignment="Center"/>
             <TextBlock x:Name="SearchHint" Text="搜索历史…" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource HintBrush}" Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
@@ -320,7 +321,7 @@
             </Button>
             <Ellipse x:Name="CollabDot" Width="8" Height="8" Fill="{StaticResource DangerBrush}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="112,8,0,0" Visibility="Collapsed"/>
           </Grid>
-          <Rectangle Height="1" Fill="{StaticResource LineBrush}" Margin="14,10,14,8"/>
+          <Rectangle Height="1" Fill="Transparent" Margin="14,10,14,8"/>
           <TextBlock Text="工具" FontSize="{StaticResource FsCaption}" Foreground="{StaticResource HintBrush}" Margin="14,0,0,6"/>
           <Button x:Name="ArchiveBtn" Style="{StaticResource NavBtn}" ToolTip="存档（打包状态日志与记忆）" Margin="8,1">
             <StackPanel Orientation="Horizontal">
@@ -342,7 +343,7 @@
           </Button>
         </StackPanel>
         <StackPanel Grid.Row="3" Margin="0,0,0,8">
-          <Rectangle Height="1" Fill="{StaticResource LineBrush}" Margin="14,4,14,8"/>
+          <Rectangle Height="1" Fill="Transparent" Margin="14,4,14,8"/>
           <Button x:Name="ShotBtn" Style="{StaticResource NavBtn}" ToolTip="给大厨看屏幕" Margin="8,1">
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="&#xE722;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
@@ -356,29 +357,29 @@
             </StackPanel>
           </Button>
         </StackPanel>
-        <Border x:Name="RailLine" HorizontalAlignment="Right" Width="1" Background="{StaticResource LineBrush}"/>
+        <Border x:Name="RailLine" HorizontalAlignment="Right" Width="1" Background="{StaticResource LineBrush}" Visibility="Collapsed"/>
       </Grid>
-      <ScrollViewer x:Name="FeedScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="6,6,2,6">
+      <ScrollViewer x:Name="FeedScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="18,8,14,6">
         <StackPanel x:Name="FeedList" HorizontalAlignment="Stretch" Width="{Binding Path=ViewportWidth, RelativeSource={RelativeSource AncestorType={x:Type ScrollViewer}}}"/>
       </ScrollViewer>
-      <Border x:Name="InputBar" Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource RailBrush}" BorderThickness="0,1,0,0" Padding="14,12,14,14">
+      <Border x:Name="InputBar" Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource RailBrush}" BorderThickness="0" Padding="18,12,18,18">
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <Border x:Name="InputBorder" Grid.Column="0" CornerRadius="8" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,10,0">
+          <Border x:Name="InputBorder" Grid.Column="0" CornerRadius="10" Background="{StaticResource InputBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0" Margin="0,0,10,0">
             <Grid>
               <TextBox x:Name="InputBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsTitle}" Foreground="{StaticResource InkBrush}"
-                       Padding="13,9" VerticalContentAlignment="Center" MaxLength="500"/>
-              <TextBlock x:Name="InputHint" Text="跟掌柜说句话…" FontSize="{StaticResource FsTitle}" Foreground="{StaticResource HintBrush}" Margin="14,0,0,0"
+                       Padding="16,10" VerticalContentAlignment="Center" MaxLength="500"/>
+              <TextBlock x:Name="InputHint" Text="跟掌柜说句话…" FontSize="{StaticResource FsTitle}" Foreground="{StaticResource HintBrush}" Margin="17,0,0,0"
                          VerticalAlignment="Center" IsHitTestVisible="False"/>
             </Grid>
           </Border>
-          <Button x:Name="SendBtn" Grid.Column="1" Width="42" Height="42" Cursor="Hand" ToolTip="发给掌柜" VerticalAlignment="Center">
+          <Button x:Name="SendBtn" Grid.Column="1" Width="40" Height="40" Cursor="Hand" ToolTip="发给掌柜" VerticalAlignment="Center">
             <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border x:Name="bd" Background="{StaticResource AccentBrush}" CornerRadius="8" BorderBrush="#66FFFFFF" BorderThickness="1">
+                <Border x:Name="bd" Background="{StaticResource AccentBrush}" CornerRadius="10" BorderBrush="#66FFFFFF" BorderThickness="0">
                   <TextBlock Text="↑" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <ControlTemplate.Triggers>
@@ -540,7 +541,7 @@
             </Border>
             </StackPanel>
         </ScrollViewer>
-        <Border x:Name="VsStatusBar" Grid.Row="1" BorderBrush="{StaticResource RailBrush}" BorderThickness="0,1,0,0" Padding="14,9,14,7">
+        <Border x:Name="VsStatusBar" Grid.Row="1" BorderBrush="{StaticResource RailBrush}" BorderThickness="0" Padding="14,9,14,7">
           <TextBlock x:Name="VsStatus" Text="等待素材 · 还差人物、背景" FontSize="{StaticResource FsMeta}" Foreground="{StaticResource MetaBrush}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
         </Border>
         <Border Grid.Row="2" Padding="14,2,14,14">
@@ -605,7 +606,7 @@
         <ScrollViewer x:Name="CbScroll" Grid.Row="2" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="8,0,4,8">
           <StackPanel x:Name="CbList"/>
         </ScrollViewer>
-        <Border x:Name="CbInputBar" Grid.Row="3" BorderBrush="{StaticResource RailBrush}" BorderThickness="0,1,0,0" Padding="14,10,14,12">
+        <Border x:Name="CbInputBar" Grid.Row="3" BorderBrush="{StaticResource RailBrush}" BorderThickness="0" Padding="18,10,18,14">
           <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
@@ -613,7 +614,7 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Border x:Name="CbInputBorder" Grid.Column="0" CornerRadius="8" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,8,0">
+            <Border x:Name="CbInputBorder" Grid.Column="0" CornerRadius="10" Background="{StaticResource InputBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0" Margin="0,0,8,0">
               <Grid>
                 <TextBox x:Name="CbInput" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsBody}" Foreground="{StaticResource InkBrush}" Padding="12,8" MaxLength="1000">
                   <TextBox.ContextMenu>
