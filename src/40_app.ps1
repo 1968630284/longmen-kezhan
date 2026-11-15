@@ -4,7 +4,7 @@ try {
     $win = [Windows.Markup.XamlReader]::Parse($xaml)
 try { Log-Boot 'window-parsed' } catch { }
 } catch {
-    [IO.File]::WriteAllText("D:\tmp\live3_err.txt", $_.Exception.ToString(), [Text.Encoding]::UTF8)
+    [IO.File]::WriteAllText("$AppRoot\live3_err.txt", $_.Exception.ToString(), [Text.Encoding]::UTF8)
     exit 1
 }
 
@@ -27,7 +27,12 @@ if ($ArchiveBtn) {
     $ArchiveBtn.Add_Click({
         $ArchiveBtn.IsEnabled = $false
         try {
-            $r = & 'D:\tmp\nailong\tools\make_archive.ps1'
+            $tool = Join-Path $AppRoot 'nailong\tools\make_archive.ps1'
+            if (-not (Test-Path -LiteralPath $tool)) {
+                Append-Feed "系统" "note" "此版本未包含存档工具（开发版才有），已跳过"
+                return
+            }
+            $r = & $tool
             $rs = "$r"
             if ($rs -like 'NOCHANGE*') {
                 Append-Feed "系统" "note" ("刚存过，没变化（包 " + ($rs.Split(':')[1]) + "）")
@@ -46,7 +51,7 @@ $ArchiveUndoBtn = $win.FindName("ArchiveUndoBtn")
 if ($ArchiveUndoBtn) {
     $ArchiveUndoBtn.Add_Click({
         try {
-            $lastf = 'D:\tmp\nailong\archive\last_archive.txt'
+            $lastf = Join-Path $AppRoot 'nailong\archive\last_archive.txt'
             if (-not (Test-Path $lastf)) { throw '没有可撤销的存档' }
             $pkgDir = (Get-Content -LiteralPath $lastf -Raw -Encoding UTF8).Trim()
             if (-not (Test-Path $pkgDir)) { throw '存档目录不存在' }
@@ -54,11 +59,11 @@ if ($ArchiveUndoBtn) {
             if ($age.TotalMinutes -gt 10) { throw ('超出 10 分钟（已 ' + [int]$age.TotalMinutes + ' 分钟），不可撤销') }
             $name = [IO.Path]::GetFileName($pkgDir)
             $ms = @()
-            $msp = 'D:\tmp\nailong\archive\milestones.txt'
+            $msp = Join-Path $AppRoot 'nailong\archive\milestones.txt'
             if (Test-Path $msp) { $ms = @(Get-Content -LiteralPath $msp -Encoding UTF8 | Where-Object { $_.Trim() }) }
             if ($ms -contains $name) { throw ('里程碑包不可撤销：' + $name) }
             Remove-Item -LiteralPath $pkgDir -Recurse -Force
-            $other = Get-ChildItem 'D:\tmp\nailong\archive' -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            $other = Get-ChildItem (Join-Path $AppRoot 'nailong\archive') -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
             if ($other) { Set-Content -LiteralPath $lastf -Value $other.FullName -Encoding UTF8 } else { Remove-Item -LiteralPath $lastf -Force -ErrorAction SilentlyContinue }
             Append-Feed "系统" "note" ("已撤销存档 " + $name)
         } catch {
@@ -70,7 +75,7 @@ $BootCopyBtn = $win.FindName("BootCopyBtn")
 if ($BootCopyBtn) {
     $BootCopyBtn.Add_Click({
         try {
-            $lastf = 'D:\tmp\nailong\archive\last_archive.txt'
+            $lastf = Join-Path $AppRoot 'nailong\archive\last_archive.txt'
             if (-not (Test-Path $lastf)) { throw '还没有存档包' }
             $pkgDir = (Get-Content -LiteralPath $lastf -Raw -Encoding UTF8).Trim()
             $msg = '读存档 ' + $pkgDir + '，按 BOOT 恢复上下文，恢复完先汇报：身份、待办、上次停在哪，然后等我指令。'
@@ -323,13 +328,13 @@ function Apply-StudioTheme {
     $script:lastOutSig = "`0force"
 
     if ($script:ApplyJobParamsTheme) {
-        try { & $script:ApplyJobParamsTheme } catch { try { [IO.File]::AppendAllText("D:\tmp\theme_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $_.Exception.ToString() + "`r`nSTACK:" + $_.ScriptStackTrace + "`r`n"), [Text.Encoding]::UTF8) } catch { } }
+        try { & $script:ApplyJobParamsTheme } catch { try { [IO.File]::AppendAllText("$AppRoot\theme_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $_.Exception.ToString() + "`r`nSTACK:" + $_.ScriptStackTrace + "`r`n"), [Text.Encoding]::UTF8) } catch { } }
     }
 }
 $DarkBtn.Add_Click({
     $script:dark = -not $script:dark
-    try { [IO.File]::WriteAllText("D:\tmp\live_theme.txt", $script:dark.ToString(), $Utf8) } catch { }
-    try { Apply-Theme } catch { try { [IO.File]::AppendAllText("D:\tmp\theme_err.txt", ((Get-Date -Format "HH:mm:ss") + " Apply-Theme 失败：" + $_.Exception.Message + "`r`nSTACK:" + $_.ScriptStackTrace + "`r`n"), [Text.Encoding]::UTF8) } catch { } }
+    try { [IO.File]::WriteAllText("$AppRoot\live_theme.txt", $script:dark.ToString(), $Utf8) } catch { }
+    try { Apply-Theme } catch { try { [IO.File]::AppendAllText("$AppRoot\theme_err.txt", ((Get-Date -Format "HH:mm:ss") + " Apply-Theme 失败：" + $_.Exception.Message + "`r`nSTACK:" + $_.ScriptStackTrace + "`r`n"), [Text.Encoding]::UTF8) } catch { } }
     $script:forceRefresh = $true
     Refresh-Feed
 })
@@ -339,7 +344,7 @@ $ShotBtn.Add_Click({
         $bmp = New-Object System.Drawing.Bitmap($b.Width, $b.Height)
         $g = [System.Drawing.Graphics]::FromImage($bmp)
         $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
-        $bmp.Save("D:\tmp\screen_for_xiaozhu.png", [System.Drawing.Imaging.ImageFormat]::Png)
+        $bmp.Save("$AppRoot\screen_for_xiaozhu.png", [System.Drawing.Imaging.ImageFormat]::Png)
         $g.Dispose(); $bmp.Dispose()
         Append-Feed "Dave" "note" "📸 我刚截了一张屏幕图给你看，你下次连接时调出来看"
         Refresh-Feed
@@ -694,7 +699,7 @@ function Refresh-Feed {
         if ($script:RenderDiagCount -lt 3) {
             $script:RenderDiagCount++
             try {
-                [IO.File]::AppendAllText("D:\tmp\nailong\health\ui.log",
+                [IO.File]::AppendAllText("$AppRoot\nailong\health\ui.log",
                     ((Get-Date -Format "HH:mm:ss.fff") + " | ui-render items=" + $items.Count +
                      " compact=" + $compactCount + " dividers=" + $dividerCount +
                      " feedW=" + [Math]::Round($FeedList.ActualWidth, 0) +
@@ -755,7 +760,7 @@ $Header.Add_MouseLeftButtonDown({
 })
 
 # ===== 视频工坊 v5.1：节点画布 =====
-$VsRoot = "D:\tmp\video_studio"
+$VsRoot = "$AppRoot\video_studio"
 $script:VsLines = @()
 $script:VsCardBg = "#FFFFFF"
 $script:VsCardLine = $script:UiTokens.Stroke
@@ -1319,7 +1324,7 @@ $GenBtn.Add_Click({
         Refresh-Feed
     } catch {
         $VsStatus.Text = "⚠ 提交失败：" + $_.Exception.Message
-        try { [IO.File]::AppendAllText("D:\tmp\nailong\verify\6\job_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $_.Exception.ToString() + "`r`nSTACK:`r`n" + $_.ScriptStackTrace + "`r`n"), [Text.Encoding]::UTF8) } catch { }
+        try { [IO.File]::AppendAllText("$AppRoot\nailong\verify\6\job_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $_.Exception.ToString() + "`r`nSTACK:`r`n" + $_.ScriptStackTrace + "`r`n"), [Text.Encoding]::UTF8) } catch { }
         try { Append-Feed "Dave" "note" ("⚠ Job 打包失败：" + $_.Exception.Message) } catch { }
     }
 })
@@ -1366,7 +1371,7 @@ function Update-PresenceBadge {
     try {
         if ($script:presenceNext -and ((Get-Date) -lt $script:presenceNext)) { return }
         $script:presenceNext = (Get-Date).AddSeconds(2)
-        $p = "D:\tmp\nailong\health\presence.json"
+        $p = "$AppRoot\nailong\health\presence.json"
         $state = "offline"
         if (Test-Path -LiteralPath $p) {
             try {
@@ -1446,7 +1451,7 @@ $script:BoldChat = $false   # 32 号：聊天正文加粗开关（只作用于�
 # 29 号帧率①：应用内计时埋点（只写 health\ui.log，不参与任何业务判断）
 function Write-UiTiming([string]$tag, [long]$ms) {
     try {
-        $d = 'D:\tmp\nailong\health'
+        $d = Join-Path $AppRoot 'nailong\health'
         if (-not (Test-Path -LiteralPath $d)) { New-Item -ItemType Directory -Force -Path $d | Out-Null }
         [IO.File]::AppendAllText((Join-Path $d 'ui.log'), ((Get-Date -Format 'HH:mm:ss.fff') + ' | ' + $tag + ' ' + $ms + 'ms' + "`r`n"))
     } catch { }
@@ -1568,7 +1573,7 @@ function Ensure-Thumb($mp4) {
     $name = [IO.Path]::GetFileNameWithoutExtension($mp4)
     $dst = Join-Path $script:ThumbDir ($name + ".jpg")
     if (Test-Path -LiteralPath $dst) { return $dst }
-    $ff = "D:\tmp\video_studio\engine\ffmpeg.exe"
+    $ff = "$AppRoot\video_studio\engine\ffmpeg.exe"
     if (-not (Test-Path -LiteralPath $ff)) { return $null }
     try {
         if (-not (Test-Path $script:ThumbDir)) { New-Item -ItemType Directory -Path $script:ThumbDir -Force | Out-Null }
@@ -1636,7 +1641,7 @@ function Confirm-Dialog($msg) {
         $dw.Content = $sp
         $dw.ShowDialog() | Out-Null
     } catch {
-        try { [IO.File]::AppendAllText("D:\tmp\nailong\verify\9\out_err.txt", ((Get-Date -Format "HH:mm:ss") + " 确认窗失败：" + $_.Exception.Message + "`r`n"), [Text.Encoding]::UTF8) } catch { }
+        try { [IO.File]::AppendAllText("$AppRoot\nailong\verify\9\out_err.txt", ((Get-Date -Format "HH:mm:ss") + " 确认窗失败：" + $_.Exception.Message + "`r`n"), [Text.Encoding]::UTF8) } catch { }
         return $false
     }
     return [bool]$script:DlgResult
@@ -1656,14 +1661,14 @@ function Show-Player($path) {
         $media.UnloadedBehavior = "Manual"
         $media.Stretch = "Uniform"
         $media.Source = New-Object Uri($path)
-        $media.Add_MediaFailed({ param($s, $e) try { [IO.File]::AppendAllText("D:\tmp\nailong\verify\9\player_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $e.ErrorException.Message + "`r`n"), [Text.Encoding]::UTF8) } catch { } })
+        $media.Add_MediaFailed({ param($s, $e) try { [IO.File]::AppendAllText("$AppRoot\nailong\verify\9\player_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $e.ErrorException.Message + "`r`n"), [Text.Encoding]::UTF8) } catch { } })
         $pw.Content = $media
         $pw.Add_Closing({ try { $media.Stop(); $media.Close() } catch { } })
         $pw.Add_KeyDown({ param($s, $e) if ($e.Key -eq "Escape") { $s.Close() } })
         $pw.ShowDialog() | Out-Null
         return $true
     } catch {
-        try { [IO.File]::AppendAllText("D:\tmp\nailong\verify\9\player_err.txt", ((Get-Date -Format "HH:mm:ss") + " 内嵌播放失败：" + $_.Exception.Message + "`r`n"), [Text.Encoding]::UTF8) } catch { }
+        try { [IO.File]::AppendAllText("$AppRoot\nailong\verify\9\player_err.txt", ((Get-Date -Format "HH:mm:ss") + " 内嵌播放失败：" + $_.Exception.Message + "`r`n"), [Text.Encoding]::UTF8) } catch { }
         try { Start-Process -FilePath $path } catch { }
         return $false
     }
@@ -1846,7 +1851,7 @@ function Refresh-Products {
         foreach ($f in $files) { [void]$OutList.Children.Add((New-OutCard $f)) }
         $OutTitle.Text = "成品 · 共 " + $files.Count + " 条（按时间倒序）"
     } catch {
-        try { [IO.File]::AppendAllText("D:\tmp\nailong\verify\9\out_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $_.Exception.ToString() + "`r`n"), [Text.Encoding]::UTF8) } catch { }
+        try { [IO.File]::AppendAllText("$AppRoot\nailong\verify\9\out_err.txt", ((Get-Date -Format "HH:mm:ss") + " " + $_.Exception.ToString() + "`r`n"), [Text.Encoding]::UTF8) } catch { }
     }
 }
 
@@ -1870,14 +1875,14 @@ function Ensure-StudioEngine {
     $running = Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" |
         Where-Object { $_.ProcessId -ne $mine -and $_.CommandLine -match 'studio_daemon2?\.ps1' }
     if ($running) { return }
-    $v2 = "D:\tmp\video_studio\engine\launch_daemon2.vbs"
+    $v2 = "$AppRoot\video_studio\engine\launch_daemon2.vbs"
     if (Test-Path $v2) {
         Start-Process wscript.exe -ArgumentList ('"' + $v2 + '"') -WindowStyle Hidden
         return
     }
-    $daemon = "D:\tmp\video_studio\engine\studio_daemon.ps1"
+    $daemon = "$AppRoot\video_studio\engine\studio_daemon.ps1"
     if (Test-Path $daemon) {
-        Start-Process wscript.exe -ArgumentList '"D:\tmp\video_studio\engine\launch_daemon.vbs"' -WindowStyle Hidden
+        Start-Process wscript.exe -ArgumentList ('"' + $VsRoot + '\engine\launch_daemon.vbs"') -WindowStyle Hidden
     }
 }
 function Open-Collab {
@@ -1892,7 +1897,7 @@ $script:cbFilter = "all"
 $script:cbKey = ""
 $script:cbSeen = 0
 $script:sendTotal = 0
-$BusRoot = "D:\tmp\nailong\bus"
+$BusRoot = "$AppRoot\nailong\bus"
 $CbKindMap = @{ "留言" = "note"; "状态" = "status"; "任务" = "task"; "提问" = "question"; "决定" = "decision" }
 $CbKindName = @{ note = "留言"; status = "状态"; task = "任务"; question = "提问"; decision = "决定"; result = "回报"; log = "日志" }
 $CbKindBgL = @{ note = "#E9EEF2"; status = "#E4F2E7"; task = "#E1EEFC"; question = "#FBF0DC"; decision = "#FBE7E4"; result = "#F1E4F7"; log = "#E9EEF2" }
@@ -2113,14 +2118,14 @@ $win.Add_Loaded({
     # ICON-01：Loaded 时窗口句柄已就绪，用 WM_SETICON 直接向窗口补发 ICO 大/小图标，兜住任务栏
     try {
         $hiconWnd = (New-Object Windows.Interop.WindowInteropHelper($win)).Handle
-        $icoPath = "D:\tmp\nailong_chef_icon.ico"
+        $icoPath = "$AppRoot\nailong_chef_icon.ico"
         if (($hiconWnd -ne [IntPtr]::Zero) -and (Test-Path -LiteralPath $icoPath)) {
             $script:icoBig = New-Object System.Drawing.Icon($icoPath, 32, 32)
             $script:icoSmall = New-Object System.Drawing.Icon($icoPath, 16, 16)
             [WinIcon]::SendMessage($hiconWnd, 0x0080, [IntPtr]1, $script:icoBig.Handle) | Out-Null
             [WinIcon]::SendMessage($hiconWnd, 0x0080, [IntPtr]0, $script:icoSmall.Handle) | Out-Null
         }
-    } catch { try { [IO.File]::WriteAllText("D:\tmp\live_icon_err.txt", ("loaded: " + $_.Exception.ToString()), (New-Object Text.UTF8Encoding $false)) } catch { } }
+    } catch { try { [IO.File]::WriteAllText("$AppRoot\live_icon_err.txt", ("loaded: " + $_.Exception.ToString()), (New-Object Text.UTF8Encoding $false)) } catch { } }
     # UI-04：深浅主题都要走一次 Apply-Theme。此前仅深色分支调用，导致浅色启动
     # 从未执行 Update-Rail，导航选中态一直是透明（XAML 默认值）。
     try { Apply-Theme } catch { }
@@ -2131,7 +2136,7 @@ $win.Add_Loaded({
             Refresh-Feed
             try { Log-Boot 'feed-ready' } catch { }
             try { Refresh-Collab; Update-CollabBadge } catch { }
-            [IO.File]::WriteAllText("D:\tmp\live3_ok.txt", ("ok v5.3 entries=" + $script:lastCount + " at " + (Get-Date -Format "HH:mm:ss")), [Text.Encoding]::UTF8)
+            [IO.File]::WriteAllText("$AppRoot\live3_ok.txt", ("ok v5.3 entries=" + $script:lastCount + " at " + (Get-Date -Format "HH:mm:ss")), [Text.Encoding]::UTF8)
             Write-AppLog ('start entries=' + $script:lastCount)
         } catch { }
     }) | Out-Null
@@ -2180,7 +2185,7 @@ if ($null -ne $ws.left -and $null -ne $ws.top) {
 
 # ICON-01：ShowDialog 之前就把窗口图标钉成 nailong.ico（IconBitmapDecoder 取最大一帧），独立 try
 try {
-    $icoPre = "D:\tmp\nailong_chef_icon.ico"
+    $icoPre = "$AppRoot\nailong_chef_icon.ico"
     if (Test-Path -LiteralPath $icoPre) {
         $icoStream = [IO.File]::OpenRead($icoPre)
         try {
@@ -2190,7 +2195,7 @@ try {
             if ($null -ne $bestFrame) { $win.Icon = $bestFrame }
         } finally { $icoStream.Close() }
     }
-} catch { try { [IO.File]::WriteAllText("D:\tmp\live_icon_err.txt", ("pre-show: " + $_.Exception.ToString()), (New-Object Text.UTF8Encoding $false)) } catch { } }
+} catch { try { [IO.File]::WriteAllText("$AppRoot\live_icon_err.txt", ("pre-show: " + $_.Exception.ToString()), (New-Object Text.UTF8Encoding $false)) } catch { } }
 
 $win.ShowDialog() | Out-Null
 Write-AppLog 'exit-dialog-returned'

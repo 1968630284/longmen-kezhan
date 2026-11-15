@@ -26,6 +26,8 @@ ok_*.png
 v5_*.png
 *_shot.png
 *.ico
+# PKG-01：图标是绿色包的构建输入，必须入库（其余 .ico 仍忽略）
+!assets/nailong_chef.ico
 
 # 凭据与 profile 备份（cordis.yml / patch 可能含配置或密钥）
 backup_*/
@@ -79,6 +81,7 @@ tools/inspect/*.txt
 nailong_ico_p*.txt
 nailong_p*.txt
 *.tmp.md
+dist/
 
 # 运行时生成的 P/Invoke 程序集缓存（由软件首次启动自行编译）
 cache/

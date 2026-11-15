@@ -1,9 +1,19 @@
 param(
-    [string]$FeedFile  = "D:\tmp\muse_feed.json",
-    [string]$StateFile = "D:\tmp\live_state.json",
+    [string]$FeedFile  = '',
+    [string]$StateFile = '',
     [switch]$NoMutex,
     [switch]$DebugFeed
 )
+
+# PKG-01：程序根目录 = 本脚本所在目录。
+# 旧部署（脚本位于 D:\tmp\xiaozhu_live.ps1）时，下面所有 $AppRoot 展开后与改前的绝对路径逐字相同；
+# 绿色包解压到任意目录，数据 / 日志 / 缓存 / 总线都落在包目录内，互不冲突。
+$script:AppRoot = if ($PSScriptRoot) { $PSScriptRoot }
+elseif ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path }
+else { (Get-Location).Path }
+$AppRoot = $script:AppRoot
+if (-not $FeedFile)  { $FeedFile  = Join-Path $AppRoot 'muse_feed.json' }
+if (-not $StateFile) { $StateFile = Join-Path $AppRoot 'live_state.json' }
 # 57 号 / UI-01：字体令牌区。这里只是启动期占位，
 # 窗口解析后会由 40_app.ps1 从 30_window.xaml 的 <sys:Double> 令牌覆盖，保证两套字号不分叉。
 $script:FontFamilyName = "Microsoft YaHei UI, Segoe UI"
@@ -20,7 +30,7 @@ $script:FwSemiBold = "SemiBold"
 $script:_t0 = [Diagnostics.Stopwatch]::StartNew()
 function Log-Boot([string]$tag) {
     try {
-        $d = "D:\tmp\nailong\health"
+        $d = "$AppRoot\nailong\health"
         if (-not (Test-Path -LiteralPath $d)) { New-Item -ItemType Directory -Force -Path $d | Out-Null }
         [IO.File]::AppendAllText((Join-Path $d "ui.log"), ((Get-Date -Format "HH:mm:ss.fff") + " | boot-" + $tag + " " + $script:_t0.ElapsedMilliseconds + "ms" + "`r`n"))
     } catch { }
@@ -39,7 +49,7 @@ Add-Type -AssemblyName System.Drawing
 function Write-AppLog([string]$msg) {
     try {
         $line = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + ' | v5.2 pid=' + $PID + ' | ' + $msg
-        $dir = 'D:\tmp\nailong\health'
+        $dir = Join-Path $AppRoot 'nailong\health'
         if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
         Add-Content -LiteralPath (Join-Path $dir 'app.log') -Value $line -Encoding UTF8
     } catch { }
@@ -105,7 +115,7 @@ $body = @($csGlassFx, $csWinIcon, $csTaskbarId) | ForEach-Object {
 $allCs = "using System;`nusing System.Runtime.InteropServices;`n" + ($body -join "`n")
 $sha = [Security.Cryptography.SHA256]::Create()
 $sig = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($allCs))).Replace('-', '').Substring(0, 8)
-$cacheDir = 'D:\tmp\nailong\cache'
+$cacheDir = Join-Path $AppRoot 'nailong\cache'
 $dllPath = Join-Path $cacheDir ('NailongNative_' + $sig + '.dll')
 $loaded = $false
 if (Test-Path -LiteralPath $dllPath) {
@@ -170,7 +180,7 @@ function Set-UiTheme([bool]$dark) {
 }
 # 主题在窗口解析前就确定，避免先用浅色 XAML 再整体改色造成闪烁
 $script:dark = $false
-try { $script:dark = ([IO.File]::ReadAllText("D:\tmp\live_theme.txt", [Text.Encoding]::UTF8).Trim() -eq "True") } catch { }
+try { $script:dark = ([IO.File]::ReadAllText("$AppRoot\live_theme.txt", [Text.Encoding]::UTF8).Trim() -eq "True") } catch { }
 Set-UiTheme $script:dark
 
 # 供 PowerShell 构造的控件取色（气泡、拖拽区、时间线等）
