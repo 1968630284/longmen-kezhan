@@ -8,13 +8,15 @@
 #  * 包内所有运行期数据（feed / 状态 / 主题 / 日志 / 总线）都落在包目录，互不覆盖。
 
 param(
-    [string]$Root = 'D:\tmp\nailong',
+    [string]$Root = '',
     [string]$OutDir = '',
     [string]$Version = (Get-Date -Format 'yyyyMMdd')
 )
 
 $ErrorActionPreference = 'Stop'
 $Name = '龙门客栈'
+# 仓库相对：CI 与本地都能直接跑
+if (-not $Root) { $Root = Split-Path -Parent $PSScriptRoot }
 if (-not $OutDir) { $OutDir = Join-Path $Root 'dist' }
 $Stage = Join-Path $OutDir $Name
 $Zip = Join-Path $OutDir ($Name + '_' + $Version + '.zip')

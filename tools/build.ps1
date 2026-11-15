@@ -12,12 +12,14 @@
 #  * 硬验收：产物 SHA256 必须等于拆分前的现役脚本 5478CAC9…（纯拆分零行为变化）。
 
 param(
-    [string]$Output = 'D:\tmp\xiaozhu_live.ps1',
+    [string]$Output = '',
     [switch]$NoMap
 )
 
 $ErrorActionPreference = 'Stop'
-$Root = 'D:\tmp\nailong'
+# 仓库相对：tools\ 的上一级就是仓库根，CI 与本地都能用
+$Root = Split-Path -Parent $PSScriptRoot
+if (-not $Output) { $Output = Join-Path (Split-Path -Parent $Root) 'xiaozhu_live.ps1' }
 $Src  = Join-Path $Root 'src'
 $Enc  = New-Object Text.UTF8Encoding($false)
 

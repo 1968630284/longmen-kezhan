@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester 4.10.1
+        shell: powershell
+        run: |
+          Install-Module Pester -RequiredVersion 4.10.1 -Force -SkipPublisherCheck -Scope CurrentUser -Confirm:$false
+
+      - name: Build single-file artifact
+        shell: powershell
+        run: ./tools/build.ps1 -Output "$env:RUNNER_TEMP\xiaozhu_live.ps1" -NoMap
+
+      - name: Baseline checks (BOM / parser / Pester)
+        shell: powershell
+        run: |
+          $env:PSModulePath = (Join-Path $env:USERPROFILE 'Documents\WindowsPowerShell\Modules') + ';' + $env:PSModulePath
+          ./tools/verify_baseline.ps1 -Main "$env:RUNNER_TEMP\xiaozhu_live.ps1" -Tag CI
+
+      - name: Build portable package
+        shell: powershell
+        run: ./tools/package.ps1 -Version ci
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: longmen-kezhan-package
+          path: dist/*.zip

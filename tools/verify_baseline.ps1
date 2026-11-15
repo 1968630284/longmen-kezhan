@@ -6,15 +6,17 @@
 
 param(
     [switch]$Mirror,
-    [string]$Tag = 'S0'
+    [string]$Tag = 'S0',
+    [string]$Main = ''
 )
 
 $ErrorActionPreference = 'Continue'
 $ProgressPreference = 'SilentlyContinue'
 
-$Main  = 'D:\tmp\xiaozhu_live.ps1'
-$Tests = 'D:\tmp\nailong\tests\DataLayer.Tests.ps1'
-$Root  = 'D:\tmp\nailong'
+# 仓库相对：本地默认校验 D:\tmp\xiaozhu_live.ps1（脚本在仓库外），CI 用 -Main 指到构建产物
+$Root  = Split-Path -Parent $PSScriptRoot
+if (-not $Main) { $Main = Join-Path (Split-Path -Parent $Root) 'xiaozhu_live.ps1' }
+$Tests = Join-Path $Root 'tests\DataLayer.Tests.ps1'
 $Stamp = (Get-Date).ToString('yyyyMMdd_HHmmss')
 $rows  = New-Object System.Collections.ArrayList
 
