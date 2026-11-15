@@ -2,6 +2,8 @@
 verify/
 *.png
 *.jpg
+# README 展示图是文档资产，必须入库（其余截图仍忽略）
+!docs/images/*.jpg
 *.jpeg
 *.zip
 *.mp4

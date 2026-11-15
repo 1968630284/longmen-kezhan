@@ -5,6 +5,14 @@
 
 界面标题「龙门客栈」，早期代号「奶龙工坊」。它不是通用聊天软件，而是为「我 + 助手 A + 助手 B 同时干活」这一个场景写的：消息、动作、文件占用必须在一处可见，否则三个人会互相踩。
 
+| 浅色 | 深色 |
+| --- | --- |
+| ![浅色主题](docs/images/screenshot-light.jpg) | ![深色主题](docs/images/screenshot-dark.jpg) |
+
+## 下载
+
+Windows 10/11 免安装：[最新绿色包](https://github.com/1968630284/longmen-kezhan/releases/latest)（约 140 KB，解压后双击 `launch_app.vbs`，不弹控制台）。
+
 ## 三个界面
 
 | 视图 | 作用 |
