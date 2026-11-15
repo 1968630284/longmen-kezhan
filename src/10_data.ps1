@@ -171,3 +171,28 @@ function Append-Feed($sender, $kind, $text) {
 # 主题切换都会成百上千次地重复造同一个颜色。核查过：所有调用点都直接赋给控件属性，
 # 无一处回写画刷对象；动画只动元素 Opacity / RenderTransform，故共享实例是安全的。
 $script:BrushCache = @{}
+
+# ==== UI-02 纯函数区（Pester 可提取，不依赖 WPF）====
+# 时间戳统一为 HH:mm。feed 的历史写法有 "20:36:00"，板上帖是完整日期时间，
+# 旧数据里还有 "20-50-03" 这类连字符分隔；先按日期解析，失败再按开头时分兜底。
+function Format-UiTime([string]$ts) {
+    $s = ([string]$ts).Trim()
+    if (-not $s) { return '' }
+    $dt = [datetime]::MinValue
+    try { if ([datetime]::TryParse($s, [ref]$dt)) { return $dt.ToString('HH:mm') } } catch { }
+    $m = [regex]::Match($s, '^(\d{1,2})[:.\-](\d{2})')
+    if ($m.Success) { return ($m.Groups[1].Value.PadLeft(2, '0') + ':' + $m.Groups[2].Value) }
+    return $s
+}
+# 连续消息分组判定：同一发送者、同一天、间隔 0–60 秒、非系统消息、非搜索态。
+# 纯布尔函数，供 Refresh-Feed 与特征测试共用，规则改动只改这一处。
+function Test-UiGrouping($prevSender, $prevWhen, $prevDate, $curSender, $curWhen, $curKind, $curDate, $filter) {
+    if ($filter) { return $false }
+    if ([string]$curKind -eq 'status') { return $false }
+    if (-not $prevSender -or [string]$prevSender -ne [string]$curSender) { return $false }
+    if ($null -eq $prevWhen -or $prevWhen -eq [datetime]::MinValue) { return $false }
+    if ([string]$curDate -ne [string]$prevDate) { return $false }
+    $delta = ([datetime]$curWhen - [datetime]$prevWhen).TotalSeconds
+    return ($delta -ge 0 -and $delta -le 60)
+}
+# ==== UI-02 END ====

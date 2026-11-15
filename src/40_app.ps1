@@ -455,7 +455,7 @@ function Read-MergedFeed {
     return $merged
 }
 
-function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
+function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Compact = $false) {
     # 50 号：聊天/传菜口共用同一套 QQ 风气泡（形状/配色/头像/头部/阴影）
     $dark = [bool]$script:dark
     $role = Get-RoleInfo ([string]$From)
@@ -463,7 +463,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
     $isSelf = ([string]$From -match 'Dave|余佳凯')
     $isSystem = ((-not $IsLog) -and ([string]$Kind -eq 'status'))
     $outer = New-Object Windows.Controls.StackPanel
-    $outer.Margin = New-Object Windows.Thickness(8, 3, 8, 3)
+    $outer.Margin = if ($Compact) { New-Object Windows.Thickness(8, 1, 8, 2) } else { New-Object Windows.Thickness(8, 3, 8, 3) }
     if ($isSystem) {
         $outer.HorizontalAlignment = "Center"
         $sys = New-Object Windows.Controls.TextBlock
@@ -496,16 +496,17 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
     $aT.HorizontalAlignment = "Center"
     $aT.VerticalAlignment = "Center"
     $av.Child = $aT
+    if ($Compact) { $av.Visibility = "Hidden" }
 
     $content = New-Object Windows.Controls.StackPanel
     $content.Margin = $(if ($isSelf) { New-Object Windows.Thickness(0, 0, 8, 0) } else { New-Object Windows.Thickness(8, 0, 0, 0) })
     $meta = New-Object Windows.Controls.TextBlock
-    $meta.Text = [string]$role.label + " · " + [string]$Ts
+    $meta.Text = [string]$role.label + " · " + (Format-UiTime ([string]$Ts))
     $meta.FontSize = $script:FsMeta
     $meta.Foreground = Tok 'Meta'
     $meta.Margin = New-Object Windows.Thickness(4, 0, 4, 3)
     $meta.HorizontalAlignment = $(if ($isSelf) { "Right" } else { "Left" })
-    $content.Children.Add($meta) | Out-Null
+    if (-not $Compact) { $content.Children.Add($meta) | Out-Null }
 
     $bubble = New-Object Windows.Controls.Border
     $bubble.MaxWidth = 420
@@ -576,8 +577,20 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog) {
     }
     return $row
 }
-function New-EntryView($e) {
-    return New-MsgBubble ([string]$e.sender) ([string]$e.kind) ([string]$e.text) ([string]$e.ts) '' $false
+function New-DayDivider([string]$label) {
+    $b = New-Object Windows.Controls.Border
+    $b.Margin = New-Object Windows.Thickness(8, 10, 8, 6)
+    $tb = New-Object Windows.Controls.TextBlock
+    $tb.Text = $label
+    $tb.FontSize = $script:FsCaption
+    $tb.Foreground = Tok 'Meta'
+    $tb.HorizontalAlignment = "Center"
+    $tb.Opacity = 0.85
+    $b.Child = $tb
+    return $b
+}
+function New-EntryView($e, [bool]$Compact = $false) {
+    return New-MsgBubble ([string]$e.sender) ([string]$e.kind) ([string]$e.text) ([string]$e.ts) '' $false $Compact
 }
 
 $script:lastCount = -1
@@ -602,7 +615,15 @@ function Refresh-Feed {
             $nearBottom = (($FeedScroll.ScrollableHeight - $FeedScroll.VerticalOffset) -lt 80)
         }
         $oldCount = $(if ($canAppend) { $script:lastRendered } else { -1 })
-        if (-not $canAppend) { $FeedList.Children.Clear() }
+        if (-not $canAppend) {
+            $FeedList.Children.Clear()
+            $script:UiPrevSender = $null
+            $script:UiPrevWhen   = [datetime]::MinValue
+            $script:UiPrevDate   = ''
+        }
+        $today = (Get-Date).Date
+        $compactCount = 0
+        $dividerCount = 0
         $idx = 0
         foreach ($e in $items) {
             if ($script:filter) {
@@ -611,15 +632,46 @@ function Refresh-Feed {
             }
             $idx++
             if ($canAppend -and $idx -le $oldCount) { continue }
-            $view = New-EntryView $e
+            $curWhen = [datetime]$e.when
+            $curDate = $curWhen.ToString('yyyy-MM-dd')
+            # UI-02：跨天插入日期分隔；搜索态不插，避免过滤结果被分隔打断
+            if ((-not $script:filter) -and $script:UiPrevDate -and $curDate -ne $script:UiPrevDate) {
+                $dayLabel = if ($curWhen.Date -eq $today) { '今天' }
+                            elseif ($curWhen.Date -eq $today.AddDays(-1)) { '昨天' }
+                            else { $curWhen.ToString('M月d日') }
+                $FeedList.Children.Add((New-DayDivider $dayLabel)) | Out-Null
+                $dividerCount++
+            }
+            # UI-02：同一发送者 60 秒内的连续消息合并成簇，后续消息不再重复头像与时间
+            $compact = Test-UiGrouping $script:UiPrevSender $script:UiPrevWhen $script:UiPrevDate ([string]$e.sender) $curWhen ([string]$e.kind) $curDate $script:filter
+            if ($compact) { $compactCount++ }
+            $view = New-EntryView $e $compact
             if ($script:BoldChat) { Set-AllBold $view }
             if ($idx -gt [Math]::Max(0, $oldCount)) {
                 Play-PopIn $view
             }
             $FeedList.Children.Add($view) | Out-Null
+            if ([string]$e.kind -eq 'status') {
+                $script:UiPrevSender = $null
+                $script:UiPrevWhen = [datetime]::MinValue
+            } else {
+                $script:UiPrevSender = [string]$e.sender
+                $script:UiPrevWhen = $curWhen
+            }
+            $script:UiPrevDate = $curDate
         }
         if ($oldCount -ge 0 -and $items.Count -gt $oldCount) { $script:LiveBusyUntil = (Get-Date).AddSeconds(8) }
         $script:lastRendered = $items.Count
+        # UI-02：每进程只记一次渲染摘要，便于验证分组生效且不污染轮询日志
+        if (-not $script:RenderDiagDone) {
+            $script:RenderDiagDone = $true
+            try {
+                [IO.File]::AppendAllText("D:\tmp\nailong\health\ui.log",
+                    ((Get-Date -Format "HH:mm:ss.fff") + " | ui-render items=" + $items.Count +
+                     " compact=" + $compactCount + " dividers=" + $dividerCount + "`r`n"),
+                    [Text.Encoding]::UTF8)
+            } catch { }
+        }
         $script:lastTotal = $total
         $script:lastCount = $total
         if ($nearBottom) { $FeedScroll.ScrollToEnd() }

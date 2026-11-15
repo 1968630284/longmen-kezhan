@@ -27,7 +27,8 @@ function Get-Block([string[]]$lines, [string]$startPattern, [string]$endPattern)
 $DataCode = (@(
     (Get-Block $Src '^function Get-FileStamp'   '^function Append-Feed'),
     (Get-Block $Src '^function Read-BusJsonl'    '^function Get-RoleInfo'),
-    (Get-Block $Src '^function Convert-FeedTime' '^function New-MsgBubble')
+    (Get-Block $Src '^function Convert-FeedTime' '^function New-MsgBubble'),
+    (Get-Block $Src '^# ==== UI-02 纯函数区'    '^# ==== UI-02 END')
 ) -join "`n") + "`n" + '$Utf8 = New-Object Text.UTF8Encoding $false'
 
 # 先指向真实数据（只读），供黄金断言使用
@@ -282,6 +283,50 @@ Describe 'S0 临时沙箱 · 数据层语义' {
         $script:ReadStats['bus:board.jsonl'].Mode | Should Be 'rebuild'
         $joined = ($items | ForEach-Object { [string]$_.text }) -join '|'
         ($joined -match 'b1-EDITED') | Should Be $true
+    }
+}
+
+# ==== UI-02：连续消息分组与时间戳统一（纯函数，不需要 WPF）====
+Describe 'UI-02 Format-UiTime · 时间戳统一' {
+    It 'HH:mm:ss 显示为 HH:mm' { (Format-UiTime '20:36:00') | Should Be '20:36' }
+    It '完整日期时间显示为 HH:mm' { (Format-UiTime '2026-11-06 23:28:54') | Should Be '23:28' }
+    It '旧连字符写法显示为 HH:mm' { (Format-UiTime '20-50-03') | Should Be '20:50' }
+    It '空串原样返回' { (Format-UiTime '') | Should Be '' }
+    It '无法识别的字符串原样返回' { (Format-UiTime 'unknown') | Should Be 'unknown' }
+    It '真实合并数据所有 ts 均可格式化为 HH:mm' {
+        $bad = @(Read-MergedFeed | Where-Object { (Format-UiTime ([string]$_.ts)) -notmatch '^\d{2}:\d{2}$' })
+        $bad.Count | Should Be 0
+    }
+}
+Describe 'UI-02 Test-UiGrouping · 分组边界' {
+    $t0 = [datetime]'2026-11-15 20:00:00'
+    $d0 = '2026-11-15'
+    It '同一发送者 30 秒内合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(30) 'note' $d0 '') | Should Be $true
+    }
+    It '恰好 60 秒仍合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(60) 'note' $d0 '') | Should Be $true
+    }
+    It '超过 60 秒不合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(61) 'note' $d0 '') | Should Be $false
+    }
+    It '不同发送者不合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'B' $t0.AddSeconds(10) 'note' $d0 '') | Should Be $false
+    }
+    It '系统消息不合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(10) 'status' $d0 '') | Should Be $false
+    }
+    It '搜索态不合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(10) 'note' $d0 'abc') | Should Be $false
+    }
+    It '跨天不合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddDays(1) 'note' '2026-11-16' '') | Should Be $false
+    }
+    It '时间倒退不合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(-5) 'note' $d0 '') | Should Be $false
+    }
+    It '首条消息（无前序）不合并' {
+        (Test-UiGrouping $null ([datetime]::MinValue) '' 'A' $t0 'note' $d0 '') | Should Be $false
     }
 }
 
