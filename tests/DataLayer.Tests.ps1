@@ -5,9 +5,24 @@
 
 $ErrorActionPreference = 'Stop'
 
-$Main     = 'D:\tmp\xiaozhu_live.ps1'
+# 主脚本路径：CI 由 verify_baseline.ps1 通过 NAILONG_MAIN 注入；本地仍走 D:\tmp
+$Main = if ($env:NAILONG_MAIN -and (Test-Path -LiteralPath $env:NAILONG_MAIN)) { $env:NAILONG_MAIN } else { 'D:\tmp\xiaozhu_live.ps1' }
 $RealFeed = 'D:\tmp\muse_feed.json'
 $RealBus  = 'D:\tmp\nailong\bus'
+
+# 没有本机真实数据时（CI / 新机器）用最小夹具，断言都是「相对文件行数」的，夹具同样成立
+$Utf8NoBom = New-Object Text.UTF8Encoding($false)
+if (-not (Test-Path -LiteralPath $RealFeed)) {
+    $RealFeed = Join-Path $env:TEMP ('nailong_fixture_feed_' + [guid]::NewGuid().ToString('N').Substring(0, 6) + '.json')
+    [IO.File]::WriteAllText($RealFeed, ('{"ts":"09:00:00","sender":"A","kind":"note","text":"fixture"}' + "`n"), $Utf8NoBom)
+}
+if (-not (Test-Path -LiteralPath (Join-Path $RealBus 'board.jsonl'))) {
+    $RealBus = Join-Path $env:TEMP ('nailong_fixture_bus_' + [guid]::NewGuid().ToString('N').Substring(0, 6))
+    New-Item -ItemType Directory -Path $RealBus -Force | Out-Null
+    [IO.File]::WriteAllText((Join-Path $RealBus 'board.jsonl'),
+        ('{"ts":"2026-11-13 09:01:00","from":"B","to":"all","kind":"note","text":"fixture","ref":"","id":"fx01"}' + "`n"), $Utf8NoBom)
+}
+
 $Src      = [IO.File]::ReadAllLines($Main, [Text.Encoding]::UTF8)
 
 function Find-LineIndex([string[]]$lines, [string]$pattern) {

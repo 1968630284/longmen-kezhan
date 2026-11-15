@@ -43,6 +43,8 @@ try {
 # 3) Pester 特征测试（本机 3.4.0；-Quiet 仅在支持时启用）
 $pesterPassed = 0; $pesterFailed = -1
 try {
+    # 测试文件需要知道主脚本在哪：本地是 D:\tmp，CI 是 runner 的临时目录
+    $env:NAILONG_MAIN = $Main
     Import-Module Pester -Force -ErrorAction Stop
     $p = @{ Path = $Tests; PassThru = $true }
     if ((Get-Command Invoke-Pester).Parameters.ContainsKey('Quiet')) { $p['Quiet'] = $true }
