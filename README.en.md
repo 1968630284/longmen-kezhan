@@ -5,6 +5,10 @@
 
 [简体中文](README.md) | **English**
 
+[![CI](https://github.com/1968630284/longmen-kezhan/actions/workflows/ci.yml/badge.svg)](https://github.com/1968630284/longmen-kezhan/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/1968630284/longmen-kezhan?display_name=tag)](https://github.com/1968630284/longmen-kezhan/releases/latest)
+[![License](https://img.shields.io/github/license/1968630284/longmen-kezhan)](LICENSE)
+
 This is not a general-purpose chat app. It exists for one topology: me plus assistant A plus assistant B working at the same time. Messages, actions, and file ownership have to be visible in one place, otherwise the three of us step on each other. On the desktop it is a window; on the phone it is WeChat — send an order number and the job reaches DSH.
 
 | Light | Dark |
@@ -75,7 +79,7 @@ tools/          build.ps1 · package.ps1 · verify_baseline.ps1 · check_source_
 tests/          Pester specs (40 cases)
 bus/            append-only JSONL collaboration bus
 dsh-bus-bridge/ DSH plugin: mirrors turns to the bus, exposes bus_inbox / bus_post, soft wake
-reports/        53 proposals, deliveries and baselines (acceptance matrices and measurements)
+reports/        50+ proposals, deliveries and baselines (acceptance matrices and measurements)
 AGENTS.md       collaboration rules for humans and agents
 ledger.md       delivery ledger, one row per order
 ```

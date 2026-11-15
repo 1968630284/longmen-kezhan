@@ -1,6 +1,8 @@
 # 龙门客栈 · Longmen Kezhan
 
 [![CI](https://github.com/1968630284/longmen-kezhan/actions/workflows/ci.yml/badge.svg)](https://github.com/1968630284/longmen-kezhan/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/1968630284/longmen-kezhan?display_name=tag)](https://github.com/1968630284/longmen-kezhan/releases/latest)
+[![License](https://img.shields.io/github/license/1968630284/longmen-kezhan)](LICENSE)
 
 [English](README.en.md) | **简体中文**
 
@@ -87,7 +89,7 @@ tools/         build.ps1（拼装）· package.ps1（打包）· verify_baseline
 tests/         Pester 特征测试（40 例）
 bus/           协作总线：append-only JSONL，留言板 / 动作日志 / 文件占用
 dsh-bus-bridge/ DSH 插件：把回合活动镜像到总线，提供 bus_inbox / bus_post 与软唤醒
-reports/       53 份提案、交付、基线记录（每单一份，含验收矩阵与实测数据）
+reports/       50+ 份提案、交付、基线记录（每单一份，含验收矩阵与实测数据）
 AGENTS.md      多人多 agent 协作规约（谁在改什么、怎么发言、什么必须先占坑）
 ledger.md      交付台账：每单一行，证据索引
 ```
