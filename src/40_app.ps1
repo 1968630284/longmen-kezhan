@@ -483,16 +483,23 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     $outer = New-Object Windows.Controls.StackPanel
     $outer.Margin = if ($Compact) { New-Object Windows.Thickness(12, 2, 12, 2) } else { New-Object Windows.Thickness(12, 6, 12, 6) }
     if ($isSystem) {
+        # UI-06：系统/HC 提示收成轻量胶囊，弱化两行裸灰字对消息流的打断
         $outer.HorizontalAlignment = "Center"
+        $pill = New-Object Windows.Controls.Border
+        $pill.Background = Tok 'Input'
+        $pill.CornerRadius = New-Object Windows.CornerRadius(8)
+        $pill.Padding = New-Object Windows.Thickness(14, 7, 14, 7)
+        $pill.MaxWidth = 560
+        $pill.HorizontalAlignment = "Center"
+        $pill.Margin = New-Object Windows.Thickness(24, 8, 24, 8)
         $sys = New-Object Windows.Controls.TextBlock
         $sys.Text = [string]$Text
         $sys.FontSize = $script:FsCaption
         $sys.TextWrapping = "Wrap"
-        $sys.MaxWidth = 560
         $sys.TextAlignment = "Center"
-        $sys.Foreground = Tok 'Meta'
-        $sys.Margin = New-Object Windows.Thickness(24, 10, 24, 10)
-        $outer.Children.Add($sys) | Out-Null
+        $sys.Foreground = Tok 'Hint'
+        $pill.Child = $sys
+        $outer.Children.Add($pill) | Out-Null
         return $outer
     }
     $row = New-Object Windows.Controls.StackPanel
@@ -518,18 +525,26 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
 
     $content = New-Object Windows.Controls.StackPanel
     $content.Margin = $(if ($isSelf) { New-Object Windows.Thickness(0, 0, 10, 0) } else { New-Object Windows.Thickness(10, 0, 0, 0) })
-    $meta = New-Object Windows.Controls.TextBlock
-    $meta.Text = [string]$role.label + " · " + (Format-UiTime ([string]$Ts))
-    $meta.FontSize = $script:FsMeta
-    $meta.Foreground = Tok 'Meta'
-    $meta.Margin = New-Object Windows.Thickness(4, 0, 4, 3)
-    $meta.HorizontalAlignment = $(if ($isSelf) { "Right" } else { "Left" })
-    if (-not $Compact) { $content.Children.Add($meta) | Out-Null }
+    # UI-06：紧凑消息不构造 meta（此前创建了但从不加入视觉树）
+    if (-not $Compact) {
+        $meta = New-Object Windows.Controls.TextBlock
+        $meta.Text = [string]$role.label + " · " + (Format-UiTime ([string]$Ts))
+        $meta.FontSize = $script:FsMeta
+        $meta.Foreground = Tok 'Meta'
+        $meta.Margin = New-Object Windows.Thickness(4, 0, 4, 4)
+        $meta.HorizontalAlignment = $(if ($isSelf) { "Right" } else { "Left" })
+        $content.Children.Add($meta) | Out-Null
+    }
 
     $bubble = New-Object Windows.Controls.Border
     $bubble.MaxWidth = 360
-    $bubble.Padding = New-Object Windows.Thickness(14, 9, 14, 9)
-    $bubble.CornerRadius = New-Object Windows.CornerRadius(12)
+    $bubble.Padding = New-Object Windows.Thickness(12, 8, 12, 8)
+    # UI-06：非对称圆角，靠近头像的一侧收小角，形成对话朝向（Fluent/IM 惯例）
+    $bubble.CornerRadius = if ($isSelf) {
+        New-Object Windows.CornerRadius(12, 12, 4, 12)
+    } else {
+        New-Object Windows.CornerRadius(12, 12, 12, 4)
+    }
     $bgc = if ($isSelf) { $script:UiTokens.SelfBg } else { $script:UiTokens.Card }
     $bubble.Background = Brush $bgc
     $bubble.BorderBrush = Tok 'Line'
@@ -1454,37 +1469,27 @@ function Play-PopIn($el) {
     try {
         # 29 号 0 项：Opacity 用元素级 BeginAnimation（Storyboard 定向 Opacity 时
         # 全部条目停在 0、聊天视图整片空白，实测踩过）；先设 1 兜底，再从 0 动画到 1。
+        # UI-06：克制化入场。原实现 4 条 DoubleAnimation + BackEase 回弹 + ScaleTransform，
+        # 每条新消息都要 4 个动画时钟；改为 2 条（Opacity + Y）、CubicEase、180ms，
+        # 更贴近 Fluent 的「轻入」且减少合成层变换。
         $el.Opacity = 1
         $el.RenderTransformOrigin = New-Object Windows.Point(0.5, 1)
-        $tg = New-Object Windows.Media.TransformGroup
-        $tr = New-Object Windows.Media.TranslateTransform(0, 12)
-        $sc = New-Object Windows.Media.ScaleTransform(0.93, 0.93)
-        $tg.Children.Add($tr) | Out-Null
-        $tg.Children.Add($sc) | Out-Null
-        $el.RenderTransform = $tg
-        $ease = New-Object Windows.Media.Animation.BackEase
-        $ease.EasingMode = "EaseOut"; $ease.Amplitude = 0.45
+        $tr = New-Object Windows.Media.TranslateTransform(0, 8)
+        $el.RenderTransform = $tr
+        $ease = New-Object Windows.Media.Animation.CubicEase
+        $ease.EasingMode = [Windows.Media.Animation.EasingMode]::EaseOut
+        $dur = New-Object Windows.Duration([TimeSpan]::FromMilliseconds(180))
         $sb = New-Object Windows.Media.Animation.Storyboard
-        $a1 = New-Object Windows.Media.Animation.DoubleAnimation(0, 1, (New-Object Windows.Duration([TimeSpan]::FromMilliseconds(200))))
+        $a1 = New-Object Windows.Media.Animation.DoubleAnimation(0, 1, $dur)
         $a1.EasingFunction = $ease
         [Windows.Media.Animation.Storyboard]::SetTarget($a1, $el)
         [Windows.Media.Animation.Storyboard]::SetTargetProperty($a1, (New-Object Windows.Media.Animation.PropertyPath("Opacity")))
         $sb.Children.Add($a1) | Out-Null
-        $a2 = New-Object Windows.Media.Animation.DoubleAnimation(12, 0, (New-Object Windows.Duration([TimeSpan]::FromMilliseconds(260))))
+        $a2 = New-Object Windows.Media.Animation.DoubleAnimation(8, 0, $dur)
         $a2.EasingFunction = $ease
         [Windows.Media.Animation.Storyboard]::SetTarget($a2, $tr)
         [Windows.Media.Animation.Storyboard]::SetTargetProperty($a2, (New-Object Windows.Media.Animation.PropertyPath("Y")))
         $sb.Children.Add($a2) | Out-Null
-        $a3 = New-Object Windows.Media.Animation.DoubleAnimation(0.93, 1, (New-Object Windows.Duration([TimeSpan]::FromMilliseconds(260))))
-        $a3.EasingFunction = $ease
-        [Windows.Media.Animation.Storyboard]::SetTarget($a3, $sc)
-        [Windows.Media.Animation.Storyboard]::SetTargetProperty($a3, (New-Object Windows.Media.Animation.PropertyPath("ScaleX")))
-        $sb.Children.Add($a3) | Out-Null
-        $a4 = New-Object Windows.Media.Animation.DoubleAnimation(0.93, 1, (New-Object Windows.Duration([TimeSpan]::FromMilliseconds(260))))
-        $a4.EasingFunction = $ease
-        [Windows.Media.Animation.Storyboard]::SetTarget($a4, $sc)
-        [Windows.Media.Animation.Storyboard]::SetTargetProperty($a4, (New-Object Windows.Media.Animation.PropertyPath("ScaleY")))
-        $sb.Children.Add($a4) | Out-Null
         $sb.Begin()
     } catch { }
 }
@@ -2155,12 +2160,8 @@ $timer.Interval = [TimeSpan]::FromSeconds(2)
 $timer.Add_Tick({ Refresh-Feed; Tick-LiveBadge; Refresh-Collab; Update-CollabBadge; Update-JobStatus; if ($script:out) { Refresh-Products } })
 $timer.Start()
 
-# 52 号：顶栏实时时钟（每秒走字）
-$clock = New-Object Windows.Threading.DispatcherTimer
-$clock.Interval = [TimeSpan]::FromSeconds(1)
-$clock.Add_Tick({ Update-Clock })
-$clock.Start()
-Update-Clock
+# UI-06：顶栏裸时钟已在 UI-05 隐藏，移除 1 秒定时器的无效 DP 写入。
+# Update-Clock 函数保留（供将来恢复时间显示时直接接回）。
 
 # 恢复上次的窗口位置和大小
 $ws = Read-WindowState

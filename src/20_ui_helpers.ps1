@@ -1,3 +1,27 @@
+# UI-06：共享事件委托。此前每条消息都新建 3 个菜单回调 + 1 个滚轮转发闭包，
+# 首屏 72 个只读 TextBox 会产生 288 个闭包/委托；改为脚本级单例，行为完全不变。
+$script:UiCopySelectedHandler = { param($s, $ev)
+    try { if ($s.Tag.SelectedText) { [Windows.Clipboard]::SetText($s.Tag.SelectedText) } } catch { } }
+$script:UiCopyAllHandler = { param($s, $ev)
+    try { [Windows.Clipboard]::SetText([string]$s.Tag.Text) } catch { } }
+$script:UiSelectAllHandler = { param($s, $ev)
+    try { $s.Tag.Focus() | Out-Null; $s.Tag.SelectAll() } catch { } }
+# UI-06：右键菜单延迟到首次使用时构造。主题切换会重建 120 条气泡，
+# 预先给每条挂 ContextMenu 是重建路径里最没必要的对象开销。
+$script:UiContextMenuHandler = { param($s, $ev)
+    try { if ($null -eq $s.ContextMenu) { Attach-CopyMenu $s } } catch { } }
+$script:UiWheelHandler = { param($s, $ev)
+    try {
+        $parent = [Windows.Media.VisualTreeHelper]::GetParent($s)
+        while ($parent -and -not ($parent -is [Windows.Controls.ScrollViewer])) {
+            $parent = [Windows.Media.VisualTreeHelper]::GetParent($parent)
+        }
+        if ($parent) {
+            $parent.ScrollToVerticalOffset($parent.VerticalOffset - ($ev.Delta / 3))
+            $ev.Handled = $true
+        }
+    } catch { } }
+
 function Brush($hex) {
     if (-not $hex) { return (New-Object Windows.Media.SolidColorBrush([Windows.Media.Colors]::Gray)) }
     $key = [string]$hex
@@ -14,15 +38,15 @@ function Attach-CopyMenu($box) {
     $m1 = New-Object Windows.Controls.MenuItem
     $m1.Header = "复制选中"
     $m1.Tag = $box
-    $m1.Add_Click({ param($s, $ev) try { $tb = $s.Tag; if ($tb.SelectedText) { [Windows.Clipboard]::SetText($tb.SelectedText) } } catch { } })
+    $m1.Add_Click($script:UiCopySelectedHandler)
     $m2 = New-Object Windows.Controls.MenuItem
     $m2.Header = "复制整条"
     $m2.Tag = $box
-    $m2.Add_Click({ param($s, $ev) try { [Windows.Clipboard]::SetText([string]$s.Tag.Text) } catch { } })
+    $m2.Add_Click($script:UiCopyAllHandler)
     $m3 = New-Object Windows.Controls.MenuItem
     $m3.Header = "全选"
     $m3.Tag = $box
-    $m3.Add_Click({ param($s, $ev) try { $s.Tag.Focus() | Out-Null; $s.Tag.SelectAll() } catch { } })
+    $m3.Add_Click($script:UiSelectAllHandler)
     $cm.Items.Add($m1) | Out-Null
     $cm.Items.Add($m2) | Out-Null
     $cm.Items.Add((New-Object Windows.Controls.Separator)) | Out-Null
@@ -39,26 +63,22 @@ function New-SelectableText([string]$text, $size, $fore, $lineH, $bg) {
     $tb.IsReadOnly = $true
     $tb.IsReadOnlyCaretVisible = $false
     $tb.IsTabStop = $false
+    # UI-06：只读展示不需要撤销栈、拼写检查、拖放与非活动选区高亮
+    $tb.IsUndoEnabled = $false
+    $tb.AllowDrop = $false
+    try { $tb.IsInactiveSelectionHighlightEnabled = $false } catch { }
+    try { [Windows.Controls.SpellCheck]::SetIsEnabled($tb, $false) } catch { }
     $tb.BorderThickness = New-Object Windows.Thickness(0)
     # 57 号：可选中正文改不透明底（透明底会让 ClearType 退化成灰度抗锯齿＝字发虚）
 if ($bg -and $bg -ne "Transparent") { $tb.Background = Brush $bg } else { $tb.Background = [Windows.Media.Brushes]::Transparent }
-try { [Windows.Media.TextOptions]::SetTextFormattingMode($tb, [Windows.Media.TextFormattingMode]::Ideal) } catch { }
+try { [Windows.Media.TextOptions]::SetTextFormattingMode($tb, [Windows.Media.TextFormattingMode]::Display) } catch { }
     $tb.Padding = New-Object Windows.Thickness(0)
     $tb.Cursor = [Windows.Input.Cursors]::IBeam
     $tb.VerticalScrollBarVisibility = "Disabled"
     $tb.HorizontalScrollBarVisibility = "Disabled"
     # 只读文本框会吃掉滚轮，转交给外层 ScrollViewer，保证聊天流照样能滚
-    $tb.Add_PreviewMouseWheel({ param($s, $ev)
-            try {
-                $parent = [Windows.Media.VisualTreeHelper]::GetParent($s)
-                while ($parent -and -not ($parent -is [Windows.Controls.ScrollViewer])) { $parent = [Windows.Media.VisualTreeHelper]::GetParent($parent) }
-                if ($parent) {
-                    $parent.ScrollToVerticalOffset($parent.VerticalOffset - ($ev.Delta / 3))
-                    $ev.Handled = $true
-                }
-            } catch { }
-        })
-    Attach-CopyMenu $tb
+    $tb.Add_PreviewMouseWheel($script:UiWheelHandler)
+    $tb.Add_ContextMenuOpening($script:UiContextMenuHandler)
     return $tb
 }
 
