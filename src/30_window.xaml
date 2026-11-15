@@ -69,7 +69,36 @@
         </Setter.Value>
       </Setter>
     </Style>
-    <Style x:Key="WinBtn" TargetType="Button">
+    <Style x:Key="NavBtn" TargetType="Button">
+    <Setter Property="Height" Value="36"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="Padding" Value="12,0,0,0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Foreground" Value="{StaticResource Ink2Brush}"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center"/>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="bd" Property="Opacity" Value="0.62"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="WinBtn" TargetType="Button">
       <Setter Property="Width" Value="44"/>
       <Setter Property="Height" Value="32"/>
       <Setter Property="Background" Value="Transparent"/>
@@ -202,7 +231,7 @@
   <Border x:Name="RootBorder" CornerRadius="12" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1">
     <Grid>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="52"/>
+        <ColumnDefinition Width="156"/>
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
       <Grid.RowDefinitions>
@@ -221,7 +250,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
           <TextBlock x:Name="TitleText" Text="龙门客栈" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" VerticalAlignment="Center"/>
-          <Border x:Name="LiveBadge" CornerRadius="9" Background="{StaticResource LiveBadgeBgBrush}" BorderBrush="{StaticResource LiveBadgeLineBrush}" BorderThickness="1" Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+          <Border x:Name="LiveBadge" CornerRadius="6" Background="{StaticResource LiveBadgeBgBrush}" BorderThickness="0" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
               <Ellipse x:Name="LiveDot" Width="6" Height="6" Fill="{StaticResource LiveDotBrush}" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                 <Ellipse.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Ellipse.RenderTransform>
@@ -229,7 +258,7 @@
               <TextBlock x:Name="LiveBadgeText" Text="营业中" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource LiveGreenBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
           </Border>
-          <TextBlock x:Name="StatusText" Text="" FontSize="{StaticResource FsMeta}" FontWeight="SemiBold" Foreground="{StaticResource MetaBrush}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+          <TextBlock x:Name="StatusText" Text="" FontSize="{StaticResource FsCaption}" FontWeight="Normal" Foreground="{StaticResource HintBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
         <Border x:Name="SearchBorder" Grid.Column="1" Width="0" CornerRadius="13" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
           <Grid>
@@ -247,7 +276,7 @@
         <Button x:Name="BtnClose" Grid.Column="5" Style="{StaticResource CloseBtn}" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="关闭">
           <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
         </Button>
-        <Border x:Name="HeaderLine" Grid.ColumnSpan="6" VerticalAlignment="Bottom" Height="1" Background="{StaticResource RailBrush}"/>
+        <Border x:Name="HeaderLine" Grid.ColumnSpan="6" VerticalAlignment="Bottom" Height="1" Background="{StaticResource RailBrush}" Visibility="Collapsed"/>
       </Grid>
       <Grid x:Name="Rail" Grid.Column="0" Grid.RowSpan="3" Background="{StaticResource SoftBrush}">
         <Grid.RowDefinitions>
@@ -263,20 +292,69 @@
           <Image x:Name="AvatarImg" Stretch="UniformToFill" Width="34" Height="34"/>
         </Border>
         <StackPanel Grid.Row="1">
-          <Button x:Name="BtnChat" Style="{StaticResource IcoBtn}" Content="&#xE8BD;" ToolTip="聊天" Margin="0,2" HorizontalAlignment="Center"/>
-          <Button x:Name="StudioBtn" Style="{StaticResource IcoBtn}" Content="&#xE714;" ToolTip="视频工坊" Margin="0,2" HorizontalAlignment="Center"/>
-          <Button x:Name="OutBtn" Style="{StaticResource IcoBtn}" Content="&#xE768;" ToolTip="成品（查看 / 删除）" Margin="0,2" HorizontalAlignment="Center"/>
-          <Grid Width="36" Height="36" Margin="0,2" HorizontalAlignment="Center">
-            <Button x:Name="CollabBtn" Style="{StaticResource IcoBtn}" Content="&#xE716;" ToolTip="传菜口（留言板 / 日志 / 占用）"/>
-            <Ellipse x:Name="CollabDot" Width="8" Height="8" Fill="{StaticResource DangerBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" Visibility="Collapsed"/>
+          <TextBlock Text="工作区" FontSize="{StaticResource FsCaption}" Foreground="{StaticResource HintBrush}" Margin="14,4,0,6"/>
+          <Button x:Name="BtnChat" Style="{StaticResource NavBtn}" ToolTip="聊天" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE8BD;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="聊天" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button x:Name="StudioBtn" Style="{StaticResource NavBtn}" ToolTip="视频工坊" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE714;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="视频工坊" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button x:Name="OutBtn" Style="{StaticResource NavBtn}" ToolTip="成品（查看 / 删除）" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE768;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="成品" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Grid Height="36" Margin="8,1">
+            <Button x:Name="CollabBtn" Style="{StaticResource NavBtn}" ToolTip="传菜口（留言板 / 日志 / 占用）">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="&#xE716;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <TextBlock Text="传菜口" FontSize="13" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+            <Ellipse x:Name="CollabDot" Width="8" Height="8" Fill="{StaticResource DangerBrush}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="112,8,0,0" Visibility="Collapsed"/>
           </Grid>
-          <Button x:Name="ArchiveBtn" Style="{StaticResource IcoBtn}" Content="&#xE74E;" ToolTip="存档（打包状态日志与记忆）" Margin="0,2" HorizontalAlignment="Center"/>
-          <Button x:Name="ArchiveUndoBtn" Style="{StaticResource IcoBtn}" Content="&#xE7A7;" ToolTip="撤销最近一次存档（10 分钟内有效）" Margin="0,2" HorizontalAlignment="Center"/>
-          <Button x:Name="BootCopyBtn" Style="{StaticResource IcoBtn}" Content="&#xE8C8;" ToolTip="复制开局语（带最新包路径）" Margin="0,2" HorizontalAlignment="Center"/>
+          <Rectangle Height="1" Fill="{StaticResource LineBrush}" Margin="14,10,14,8"/>
+          <TextBlock Text="工具" FontSize="{StaticResource FsCaption}" Foreground="{StaticResource HintBrush}" Margin="14,0,0,6"/>
+          <Button x:Name="ArchiveBtn" Style="{StaticResource NavBtn}" ToolTip="存档（打包状态日志与记忆）" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE74E;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="存档" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button x:Name="ArchiveUndoBtn" Style="{StaticResource NavBtn}" ToolTip="撤销最近一次存档（10 分钟内有效）" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE7A7;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="撤销存档" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button x:Name="BootCopyBtn" Style="{StaticResource NavBtn}" ToolTip="复制开局语（带最新包路径）" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE8C8;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="复制开局语" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
         </StackPanel>
         <StackPanel Grid.Row="3" Margin="0,0,0,8">
-          <Button x:Name="ShotBtn" Style="{StaticResource IcoBtn}" Content="&#xE722;" ToolTip="给大厨看屏幕" Margin="0,2" HorizontalAlignment="Center"/>
-          <Button x:Name="DarkBtn" Style="{StaticResource IcoBtn}" Content="&#xE706;" ToolTip="深浅色" Margin="0,2" HorizontalAlignment="Center"/>
+          <Rectangle Height="1" Fill="{StaticResource LineBrush}" Margin="14,4,14,8"/>
+          <Button x:Name="ShotBtn" Style="{StaticResource NavBtn}" ToolTip="给大厨看屏幕" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE722;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="截图" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button x:Name="DarkBtn" Style="{StaticResource NavBtn}" ToolTip="深浅色" Margin="8,1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE706;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <TextBlock Text="切换主题" FontSize="13" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
         </StackPanel>
         <Border x:Name="RailLine" HorizontalAlignment="Right" Width="1" Background="{StaticResource LineBrush}"/>
       </Grid>
@@ -289,7 +367,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <Border x:Name="InputBorder" Grid.Column="0" CornerRadius="20" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,10,0">
+          <Border x:Name="InputBorder" Grid.Column="0" CornerRadius="8" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,10,0">
             <Grid>
               <TextBox x:Name="InputBox" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsTitle}" Foreground="{StaticResource InkBrush}"
                        Padding="13,9" VerticalContentAlignment="Center" MaxLength="500"/>
@@ -300,7 +378,7 @@
           <Button x:Name="SendBtn" Grid.Column="1" Width="42" Height="42" Cursor="Hand" ToolTip="发给掌柜" VerticalAlignment="Center">
             <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border x:Name="bd" Background="{StaticResource AccentBrush}" CornerRadius="21" BorderBrush="#66FFFFFF" BorderThickness="1">
+                <Border x:Name="bd" Background="{StaticResource AccentBrush}" CornerRadius="8" BorderBrush="#66FFFFFF" BorderThickness="1">
                   <TextBlock Text="↑" FontSize="{StaticResource FsTitle}" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <ControlTemplate.Triggers>
@@ -535,7 +613,7 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Border x:Name="CbInputBorder" Grid.Column="0" CornerRadius="18" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,8,0">
+            <Border x:Name="CbInputBorder" Grid.Column="0" CornerRadius="8" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Margin="0,0,8,0">
               <Grid>
                 <TextBox x:Name="CbInput" BorderThickness="0" Background="Transparent" FontSize="{StaticResource FsBody}" Foreground="{StaticResource InkBrush}" Padding="12,8" MaxLength="1000">
                   <TextBox.ContextMenu>

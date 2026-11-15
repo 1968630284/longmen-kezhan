@@ -336,7 +336,8 @@ $SearchBox.Add_TextChanged({
 })
 
 $script:KindName = @{ status = "状态"; command = "命令"; result = "结果"; question = "提问"; note = "留言"; task = "任务"; decision = "决定"; discuss = "商量"; log = "日志" }
-$script:dark = $false
+# UI-04：不再在这里重置 $script:dark。主题由 00_header.ps1 在窗口解析前统一读取，
+# 此处重置会造成「XAML 注入深色 / Apply-Theme 用浅色」的混合状态。
 $script:filter = ""
 $script:forceRefresh = $false
 # UI-01：历史遗留的气泡色板改为从单一色板派生（无调用点，保留接口）
@@ -509,7 +510,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     if (-not $Compact) { $content.Children.Add($meta) | Out-Null }
 
     $bubble = New-Object Windows.Controls.Border
-    $bubble.MaxWidth = 380
+    $bubble.MaxWidth = 340
     $bubble.Padding = New-Object Windows.Thickness(12, 8, 12, 8)
     $bubble.CornerRadius = New-Object Windows.CornerRadius(10)
     $bgc = if ($isSelf) { $script:UiTokens.SelfBg } else { $script:UiTokens.Card }
@@ -558,7 +559,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     }
     $fg = if ($isSelf) { $script:UiTokens.SelfInk } else { $script:UiTokens.Ink }
     $body = New-SelectableText ([string]$Text) $script:FsBody (Brush $fg) 20 $bgc
-    $body.MaxWidth = 352
+    $body.MaxWidth = 312
     $inner.Children.Add($body) | Out-Null
     $bubble.Child = $inner
     $content.Children.Add($bubble) | Out-Null
@@ -668,7 +669,10 @@ function Refresh-Feed {
                      " viewportW=" + [Math]::Round($FeedScroll.ViewportWidth, 0) +
                      " winW=" + [Math]::Round($win.ActualWidth, 0) +
                      " winH=" + [Math]::Round($win.ActualHeight, 0) +
-                     " inputVis=" + $InputBar.Visibility + "`r`n"),
+                     " inputVis=" + $InputBar.Visibility +
+                     " dark=" + $script:dark +
+                     " surface=" + $script:UiTokens.Surface +
+                     " soft=" + $script:UiTokens.Soft + "`r`n"),
                     [Text.Encoding]::UTF8)
             } catch { }
         }
@@ -1489,7 +1493,7 @@ function Play-Press($el, [double]$scale, [int]$ms) {
 
 function Update-Rail {
     try {
-        $active = $script:UiTokens.Soft
+        $active = $script:UiTokens.CharSoft
         $fg = $script:UiTokens.Ink2
         $accent = Tok 'Accent'
         $chatOn = (-not $script:studio) -and (-not $script:collab) -and (-not $script:out)
@@ -2095,7 +2099,9 @@ $win.Add_Loaded({
             [WinIcon]::SendMessage($hiconWnd, 0x0080, [IntPtr]0, $script:icoSmall.Handle) | Out-Null
         }
     } catch { try { [IO.File]::WriteAllText("D:\tmp\live_icon_err.txt", ("loaded: " + $_.Exception.ToString()), (New-Object Text.UTF8Encoding $false)) } catch { } }
-    try { if ([IO.File]::ReadAllText("D:\tmp\live_theme.txt").Trim() -eq "True") { $script:dark = $true; Apply-Theme } } catch { }
+    # UI-04：深浅主题都要走一次 Apply-Theme。此前仅深色分支调用，导致浅色启动
+    # 从未执行 Update-Rail，导航选中态一直是透明（XAML 默认值）。
+    try { Apply-Theme } catch { }
     Log-Boot 'loaded-enter'
     # 53 号：先画窗后填 feed —— 首帧交给消息循环，feed 在 Background 优先级异步构建
     $win.Dispatcher.BeginInvoke([Windows.Threading.DispatcherPriority]::Background, [Action]{
