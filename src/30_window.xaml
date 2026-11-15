@@ -176,12 +176,14 @@
       <Setter Property="FontSize" Value="17"/>
       <Setter Property="Foreground" Value="{StaticResource Ink2Brush}"/>
       <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="9">
+            <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="9">
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <ControlTemplate.Triggers>
@@ -247,7 +249,7 @@
         </Button>
         <Border x:Name="HeaderLine" Grid.ColumnSpan="6" VerticalAlignment="Bottom" Height="1" Background="{StaticResource RailBrush}"/>
       </Grid>
-      <Grid x:Name="Rail" Grid.Column="0" Grid.RowSpan="3" Background="Transparent">
+      <Grid x:Name="Rail" Grid.Column="0" Grid.RowSpan="3" Background="{StaticResource SoftBrush}">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
@@ -279,7 +281,7 @@
         <Border x:Name="RailLine" HorizontalAlignment="Right" Width="1" Background="{StaticResource LineBrush}"/>
       </Grid>
       <ScrollViewer x:Name="FeedScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Visible" CanContentScroll="False" HorizontalScrollBarVisibility="Disabled" Padding="6,6,2,6">
-        <StackPanel x:Name="FeedList"/>
+        <StackPanel x:Name="FeedList" HorizontalAlignment="Stretch" Width="{Binding Path=ViewportWidth, RelativeSource={RelativeSource AncestorType={x:Type ScrollViewer}}}"/>
       </ScrollViewer>
       <Border x:Name="InputBar" Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource RailBrush}" BorderThickness="0,1,0,0" Padding="14,12,14,14">
         <Grid>

@@ -142,11 +142,12 @@ $script:UiLight = @{
     Hover = '#EAF1F8'; Pressed = '#DCE7F3'; Thumb = '#33000000'
     LiveGreen = '#1E9E4A'; LiveBadgeBg = '#1A35C759'; LiveBadgeLine = '#4D35C759'; LiveDot = '#35C759'
     Danger = '#E5484D'; CloseRed = '#E81123'; Shadow = '#33507A'
-    MyBg = '#FFFFFF'; MyLine = '#E2EAF2'; SelfBg = '#185FA5'; SelfInk = '#FFFFFF'
+    MyBg = '#FFFFFF'; MyLine = '#E2EAF2'; SelfBg = '#E8F1FB'; SelfInk = '#16283C'
     Char = '#1565C0'; CharSoft = '#DCEBFB'
     BgCat = '#2E7D32'; BgSoft = '#DFF2E2'
     Scene = '#7B1FA2'; SceneSoft = '#EEE3F7'
     Prompt = '#C25E10'; PromptSoft = '#FDEBD8'
+    RoleSelf = '#4A5A72'; RoleHost = '#2E5A8A'; RoleGpt = '#6B4A8A'; RoleChef = '#2E6B4A'; RoleUnknown = '#5A6B82'
 }
 $script:UiDark = @{
     Surface = '#F2172432'; SurfaceStroke = '#172432'; Card = '#22303F'; Soft = '#1B2836'
@@ -156,11 +157,12 @@ $script:UiDark = @{
     Hover = '#2A3B4F'; Pressed = '#31465C'; Thumb = '#66FFFFFF'
     LiveGreen = '#4ADE80'; LiveBadgeBg = '#2B35C759'; LiveBadgeLine = '#6635C759'; LiveDot = '#4ADE80'
     Danger = '#E5484D'; CloseRed = '#E81123'; Shadow = '#000000'
-    MyBg = '#22303F'; MyLine = '#3A4E66'; SelfBg = '#2563B8'; SelfInk = '#FFFFFF'
+    MyBg = '#22303F'; MyLine = '#3A4E66'; SelfBg = '#20334A'; SelfInk = '#EAF1F8'
     Char = '#9CC3EE'; CharSoft = '#1E3A56'
     BgCat = '#9AD3A5'; BgSoft = '#1E4030'
     Scene = '#D3A8EE'; SceneSoft = '#39264D'
     Prompt = '#F2C184'; PromptSoft = '#4D3418'
+    RoleSelf = '#4A5A72'; RoleHost = '#2E5A8A'; RoleGpt = '#6B4A8A'; RoleChef = '#2E6B4A'; RoleUnknown = '#5A6B82'
 }
 function Set-UiTheme([bool]$dark) {
     $script:dark = $dark

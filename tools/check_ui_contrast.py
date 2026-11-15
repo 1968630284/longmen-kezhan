@@ -35,7 +35,7 @@ cases = [
     ('提示文字 / 卡片',      'Hint',      'Card',        4.5),
     ('次级文字 / 卡片',      'Ink2',      'Card',        4.5),
     ('按钮白字 / 主色',      'AccentInk', 'Accent',      4.5),
-    ('自己气泡白字',         'SelfInk',   'SelfBg',      4.5),
+    ('自己气泡文字',         'SelfInk',   'SelfBg',      4.5),
     ('组件描边 / 卡片',      'Stroke',    'Card',        3.0),
     ('焦点环 / 卡片',        'Focus',     'Card',        3.0),
     ('在线绿 / 窗口底',      'LiveGreen', 'Surface',     3.0),

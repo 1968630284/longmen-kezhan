@@ -184,7 +184,8 @@ function Format-UiTime([string]$ts) {
     if ($m.Success) { return ($m.Groups[1].Value.PadLeft(2, '0') + ':' + $m.Groups[2].Value) }
     return $s
 }
-# 连续消息分组判定：同一发送者、同一天、间隔 0–60 秒、非系统消息、非搜索态。
+# 连续消息分组判定：同一发送者、同一天、间隔 0–120 秒、非系统消息、非搜索态。
+# 本机消息多为 1 分钟间隔的操作回执，60 秒会把它们逐条拆开，故取 2 分钟。
 # 纯布尔函数，供 Refresh-Feed 与特征测试共用，规则改动只改这一处。
 function Test-UiGrouping($prevSender, $prevWhen, $prevDate, $curSender, $curWhen, $curKind, $curDate, $filter) {
     if ($filter) { return $false }
@@ -193,6 +194,6 @@ function Test-UiGrouping($prevSender, $prevWhen, $prevDate, $curSender, $curWhen
     if ($null -eq $prevWhen -or $prevWhen -eq [datetime]::MinValue) { return $false }
     if ([string]$curDate -ne [string]$prevDate) { return $false }
     $delta = ([datetime]$curWhen - [datetime]$prevWhen).TotalSeconds
-    return ($delta -ge 0 -and $delta -le 60)
+    return ($delta -ge 0 -and $delta -le 120)
 }
 # ==== UI-02 END ====

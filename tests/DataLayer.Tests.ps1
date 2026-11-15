@@ -304,11 +304,11 @@ Describe 'UI-02 Test-UiGrouping · 分组边界' {
     It '同一发送者 30 秒内合并' {
         (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(30) 'note' $d0 '') | Should Be $true
     }
-    It '恰好 60 秒仍合并' {
-        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(60) 'note' $d0 '') | Should Be $true
+    It '恰好 120 秒仍合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(120) 'note' $d0 '') | Should Be $true
     }
-    It '超过 60 秒不合并' {
-        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(61) 'note' $d0 '') | Should Be $false
+    It '超过 120 秒不合并' {
+        (Test-UiGrouping 'A' $t0 $d0 'A' $t0.AddSeconds(121) 'note' $d0 '') | Should Be $false
     }
     It '不同发送者不合并' {
         (Test-UiGrouping 'A' $t0 $d0 'B' $t0.AddSeconds(10) 'note' $d0 '') | Should Be $false

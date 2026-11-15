@@ -459,21 +459,21 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     # 50 号：聊天/传菜口共用同一套 QQ 风气泡（形状/配色/头像/头部/阴影）
     $dark = [bool]$script:dark
     $role = Get-RoleInfo ([string]$From)
-    if ([string]$From -match 'Dave|余佳凯') { $role = @{ label = '客官'; color = '#8A5A44' } }
+    if ([string]$From -match 'Dave|余佳凯') { $role = @{ label = '客官'; color = $script:UiTokens.RoleSelf } }
     $isSelf = ([string]$From -match 'Dave|余佳凯')
     $isSystem = ((-not $IsLog) -and ([string]$Kind -eq 'status'))
     $outer = New-Object Windows.Controls.StackPanel
-    $outer.Margin = if ($Compact) { New-Object Windows.Thickness(8, 1, 8, 2) } else { New-Object Windows.Thickness(8, 3, 8, 3) }
+    $outer.Margin = if ($Compact) { New-Object Windows.Thickness(12, 2, 12, 2) } else { New-Object Windows.Thickness(12, 6, 12, 6) }
     if ($isSystem) {
         $outer.HorizontalAlignment = "Center"
         $sys = New-Object Windows.Controls.TextBlock
         $sys.Text = [string]$Text
-        $sys.FontSize = $script:FsMeta
+        $sys.FontSize = $script:FsCaption
         $sys.TextWrapping = "Wrap"
-        $sys.MaxWidth = 470
+        $sys.MaxWidth = 560
         $sys.TextAlignment = "Center"
         $sys.Foreground = Tok 'Meta'
-        $sys.Margin = New-Object Windows.Thickness(24, 4, 24, 4)
+        $sys.Margin = New-Object Windows.Thickness(24, 10, 24, 10)
         $outer.Children.Add($sys) | Out-Null
         return $outer
     }
@@ -482,11 +482,11 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     $row.HorizontalAlignment = $(if ($isSelf) { "Right" } else { "Left" })
 
     $av = New-Object Windows.Controls.Border
-    $av.Width = 34; $av.Height = 34
-    $av.CornerRadius = New-Object Windows.CornerRadius(17)
+    $av.Width = 32; $av.Height = 32
+    $av.CornerRadius = New-Object Windows.CornerRadius(16)
     $av.Background = Brush ([string]$role.color)
     $av.VerticalAlignment = "Top"
-    $av.Margin = New-Object Windows.Thickness(0, 18, 0, 0)
+    $av.Margin = New-Object Windows.Thickness(0, 16, 0, 0)
     $aT = New-Object Windows.Controls.TextBlock
     $lbl = [string]$role.label
     $aT.Text = $(if ($lbl.Length -gt 0) { $lbl.Substring(0, 1) } else { "?" })
@@ -499,7 +499,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     if ($Compact) { $av.Visibility = "Hidden" }
 
     $content = New-Object Windows.Controls.StackPanel
-    $content.Margin = $(if ($isSelf) { New-Object Windows.Thickness(0, 0, 8, 0) } else { New-Object Windows.Thickness(8, 0, 0, 0) })
+    $content.Margin = $(if ($isSelf) { New-Object Windows.Thickness(0, 0, 10, 0) } else { New-Object Windows.Thickness(10, 0, 0, 0) })
     $meta = New-Object Windows.Controls.TextBlock
     $meta.Text = [string]$role.label + " · " + (Format-UiTime ([string]$Ts))
     $meta.FontSize = $script:FsMeta
@@ -509,20 +509,14 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     if (-not $Compact) { $content.Children.Add($meta) | Out-Null }
 
     $bubble = New-Object Windows.Controls.Border
-    $bubble.MaxWidth = 420
-    $bubble.Padding = New-Object Windows.Thickness(12, 9, 12, 9)
-    $bubble.CornerRadius = New-Object Windows.CornerRadius(18)
+    $bubble.MaxWidth = 380
+    $bubble.Padding = New-Object Windows.Thickness(12, 8, 12, 8)
+    $bubble.CornerRadius = New-Object Windows.CornerRadius(10)
     $bgc = if ($isSelf) { $script:UiTokens.SelfBg } else { $script:UiTokens.Card }
     $bubble.Background = Brush $bgc
-    if (-not $isSelf) {
-        $bubble.BorderBrush = Tok 'Stroke'
-        $bubble.BorderThickness = New-Object Windows.Thickness(1)
-    }
-    # 50-补：阴影保留，照旧
-    $shadow = New-Object Windows.Media.Effects.DropShadowEffect
-    $shadow.BlurRadius = 6; $shadow.ShadowDepth = 1; $shadow.Opacity = 0.07
-    $shadow.Color = (Tok 'Shadow').Color
-    $bubble.Effect = $shadow
+    $bubble.BorderBrush = Tok 'Line'
+    $bubble.BorderThickness = New-Object Windows.Thickness(1)
+    # UI-03：移除逐条气泡投影，改由底色层次 + 留白表达分组（对齐 Teams / 飞书的克制做法）
 
     $inner = New-Object Windows.Controls.StackPanel
     $kind = [string]$Kind
@@ -564,6 +558,7 @@ function New-MsgBubble($From, $Kind, $Text, $Ts, $Prio, [bool]$IsLog, [bool]$Com
     }
     $fg = if ($isSelf) { $script:UiTokens.SelfInk } else { $script:UiTokens.Ink }
     $body = New-SelectableText ([string]$Text) $script:FsBody (Brush $fg) 20 $bgc
+    $body.MaxWidth = 352
     $inner.Children.Add($body) | Out-Null
     $bubble.Child = $inner
     $content.Children.Add($bubble) | Out-Null
@@ -662,13 +657,18 @@ function Refresh-Feed {
         }
         if ($oldCount -ge 0 -and $items.Count -gt $oldCount) { $script:LiveBusyUntil = (Get-Date).AddSeconds(8) }
         $script:lastRendered = $items.Count
-        # UI-02：每进程只记一次渲染摘要，便于验证分组生效且不污染轮询日志
-        if (-not $script:RenderDiagDone) {
-            $script:RenderDiagDone = $true
+        # UI-02 / UI-03：前 3 次渲染记录布局摘要（分组生效 + 实际宽度），之后静默不刷屏
+        if ($script:RenderDiagCount -lt 3) {
+            $script:RenderDiagCount++
             try {
                 [IO.File]::AppendAllText("D:\tmp\nailong\health\ui.log",
                     ((Get-Date -Format "HH:mm:ss.fff") + " | ui-render items=" + $items.Count +
-                     " compact=" + $compactCount + " dividers=" + $dividerCount + "`r`n"),
+                     " compact=" + $compactCount + " dividers=" + $dividerCount +
+                     " feedW=" + [Math]::Round($FeedList.ActualWidth, 0) +
+                     " viewportW=" + [Math]::Round($FeedScroll.ViewportWidth, 0) +
+                     " winW=" + [Math]::Round($win.ActualWidth, 0) +
+                     " winH=" + [Math]::Round($win.ActualHeight, 0) +
+                     " inputVis=" + $InputBar.Visibility + "`r`n"),
                     [Text.Encoding]::UTF8)
             } catch { }
         }
@@ -1489,12 +1489,24 @@ function Play-Press($el, [double]$scale, [int]$ms) {
 
 function Update-Rail {
     try {
-        $active = $script:UiTokens.CharSoft
+        $active = $script:UiTokens.Soft
         $fg = $script:UiTokens.Ink2
-        $BtnChat.Background = Brush $(if ((-not $script:studio) -and (-not $script:collab) -and (-not $script:out)) { $active } else { "Transparent" })
-        $StudioBtn.Background = Brush $(if ($script:studio) { $active } else { "Transparent" })
-        if ($OutBtn) { $OutBtn.Background = Brush $(if ($script:out) { $active } else { "Transparent" }) }
-        $CollabBtn.Background = Brush $(if ($script:collab) { $active } else { "Transparent" })
+        $accent = Tok 'Accent'
+        $chatOn = (-not $script:studio) -and (-not $script:collab) -and (-not $script:out)
+        $states = @{ chat = $chatOn; studio = [bool]$script:studio; out = [bool]$script:out; collab = [bool]$script:collab }
+        $btns = @{ chat = $BtnChat; studio = $StudioBtn; out = $OutBtn; collab = $CollabBtn }
+        foreach ($k in @('chat','studio','out','collab')) {
+            $b = $btns[$k]
+            if (-not $b) { continue }
+            if ($states[$k]) {
+                $b.Background = Brush $active
+                $b.BorderBrush = $accent
+                $b.BorderThickness = New-Object Windows.Thickness(3, 0, 0, 0)
+            } else {
+                $b.Background = Brush 'Transparent'
+                $b.BorderThickness = New-Object Windows.Thickness(0)
+            }
+        }
         foreach ($b in @($BtnChat, $StudioBtn, $OutBtn, $CollabBtn, $ArchiveBtn, $ArchiveUndoBtn, $BootCopyBtn)) { if ($b) { $b.Foreground = Brush $fg } }
         if ($script:ViewW -and ($win.Width -ne $script:ViewW -or $win.Height -ne $script:ViewH)) { $win.Width = $script:ViewW; $win.Height = $script:ViewH }
     } catch { }
@@ -1884,10 +1896,10 @@ function Get-RoleInfo([string]$from) {
     # 24-改：roster 只留 小猪 / 大厨 / GPT。客官不再单独成成员（取消红标）；
     # 其余一切识别不出的 from（存档、HC、客官历史帖、roster 外任何人）统一落到
     # 「未识别」中性灰类，**不许再并进大厨**，保证与绿标一眼能分开。历史帖不删。
-    if ($from -match '调度|XIAOZHU|小猪|assistant') { return @{ label = "掌柜"; color = "#2F7DE1"; bgL = "#E1EEFC"; bgD = "#1E3A56" } }
-    if ($from -match 'GPT') { return @{ label = "GPT"; color = "#8E24AA"; bgL = "#F0E6FA"; bgD = "#39264D" } }
-    if ($from -match '工兵|LOCAL|DSH|后厨|大厨') { return @{ label = "大厨"; color = "#2E9E5B"; bgL = "#DFF2E2"; bgD = "#1E4030" } }
-    return @{ label = "未识别"; color = "#7A869A"; bgL = "#EEF1F5"; bgD = "#2A3440" }
+    if ($from -match '调度|XIAOZHU|小猪|assistant') { return @{ label = "掌柜"; color = $script:UiTokens.RoleHost; bgL = "#E1EEFC"; bgD = "#1E3A56" } }
+    if ($from -match 'GPT') { return @{ label = "GPT"; color = $script:UiTokens.RoleGpt; bgL = "#F0E6FA"; bgD = "#39264D" } }
+    if ($from -match '工兵|LOCAL|DSH|后厨|大厨') { return @{ label = "大厨"; color = $script:UiTokens.RoleChef; bgL = "#DFF2E2"; bgD = "#1E4030" } }
+    return @{ label = "未识别"; color = $script:UiTokens.RoleUnknown; bgL = "#EEF1F5"; bgD = "#2A3440" }
 }
 function New-CbCard($m, [bool]$isLog) {
     # 50 号（50-补2）：传菜口改用与聊天同一套气泡；任务帖带档位胶囊
