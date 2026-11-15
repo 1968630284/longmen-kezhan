@@ -626,6 +626,84 @@ function New-EntryView($e, [bool]$Compact = $false) {
     return New-MsgBubble ([string]$e.sender) ([string]$e.kind) ([string]$e.text) ([string]$e.ts) '' $false $Compact
 }
 
+# PKG-02：空板引导。只在「一条消息都没有」时渲染，收到第一条消息即消失。
+# 不写 feed、不写总线，纯视图层，因此不会污染任何人的对话记录。
+function New-WelcomeCard {
+    $outer = New-Object Windows.Controls.StackPanel
+    $outer.Margin = New-Object Windows.Thickness(24, 28, 24, 12)
+
+    $card = New-Object Windows.Controls.Border
+    $card.Background = Tok 'Soft'
+    $card.BorderBrush = Tok 'Line'
+    $card.BorderThickness = New-Object Windows.Thickness(1)
+    $card.CornerRadius = New-Object Windows.CornerRadius(14)
+    $card.Padding = New-Object Windows.Thickness(24, 20, 24, 18)
+    $card.MaxWidth = 560
+    $card.HorizontalAlignment = 'Center'
+
+    $stack = New-Object Windows.Controls.StackPanel
+
+    $title = New-Object Windows.Controls.TextBlock
+    $title.Text = '欢迎来到龙门客栈'
+    $title.FontSize = $script:FsDisplay
+    $title.FontWeight = 'SemiBold'
+    $title.Foreground = Tok 'Ink'
+    $stack.Children.Add($title) | Out-Null
+
+    $sub = New-Object Windows.Controls.TextBlock
+    $sub.Text = '你和两个助手共用这一条时间线。还没有消息时，先认识三个视图：'
+    $sub.FontSize = $script:FsMeta
+    $sub.Foreground = Tok 'Meta'
+    $sub.TextWrapping = 'Wrap'
+    $sub.Margin = New-Object Windows.Thickness(0, 8, 0, 12)
+    $stack.Children.Add($sub) | Out-Null
+
+    $rows = @(
+        @('聊天', '三方消息按时间合并；在底部输入框说话，会同时写进聊天流和协作总线。'),
+        @('传菜口', '留言板 / 动作日志 / 文件占用。助手改文件前先占坑，谁在改什么一眼可见。'),
+        @('视频工坊', '本地渲染队列与成品预览；未安装 ffmpeg 时会提示跳过。')
+    )
+    foreach ($r in $rows) {
+        $row = New-Object Windows.Controls.StackPanel
+        $row.Orientation = 'Horizontal'
+        $row.Margin = New-Object Windows.Thickness(0, 5, 0, 0)
+
+        $dot = New-Object Windows.Shapes.Ellipse
+        $dot.Width = 6
+        $dot.Height = 6
+        $dot.Fill = Tok 'Accent'
+        $dot.Margin = New-Object Windows.Thickness(1, 8, 10, 0)
+        $dot.VerticalAlignment = 'Top'
+        $row.Children.Add($dot) | Out-Null
+
+        $txt = New-Object Windows.Controls.TextBlock
+        $txt.TextWrapping = 'Wrap'
+        $txt.MaxWidth = 468
+        $label = New-Object Windows.Documents.Run ([string]$r[0] + '　')
+        $label.FontWeight = 'SemiBold'
+        $label.Foreground = Tok 'Ink'
+        $desc = New-Object Windows.Documents.Run ([string]$r[1])
+        $desc.Foreground = Tok 'Ink2'
+        $txt.Inlines.Add($label) | Out-Null
+        $txt.Inlines.Add($desc) | Out-Null
+        $txt.FontSize = $script:FsBody
+        $row.Children.Add($txt) | Out-Null
+
+        $stack.Children.Add($row) | Out-Null
+    }
+
+    $foot = New-Object Windows.Controls.TextBlock
+    $foot.Text = '收到第一条消息后，这条引导会自动消失。'
+    $foot.FontSize = $script:FsCaption
+    $foot.Foreground = Tok 'Hint'
+    $foot.Margin = New-Object Windows.Thickness(0, 14, 0, 0)
+    $stack.Children.Add($foot) | Out-Null
+
+    $card.Child = $stack
+    $outer.Children.Add($card) | Out-Null
+    return $outer
+}
+
 $script:lastCount = -1
 $script:lastTotal = -1
 $script:lastRendered = 0
@@ -653,6 +731,10 @@ function Refresh-Feed {
             $script:UiPrevSender = $null
             $script:UiPrevWhen   = [datetime]::MinValue
             $script:UiPrevDate   = ''
+        }
+        # PKG-02：空板时给首次使用者一张引导卡；搜索态不显示，避免与「无结果」混淆
+        if ($total -eq 0 -and -not $script:filter -and -not $canAppend) {
+            $FeedList.Children.Add((New-WelcomeCard)) | Out-Null
         }
         $today = (Get-Date).Date
         $compactCount = 0
