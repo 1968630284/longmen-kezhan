@@ -1,5 +1,9 @@
 # 龙门客栈 · Longmen Kezhan
 
+[![CI](https://github.com/1968630284/longmen-kezhan/actions/workflows/ci.yml/badge.svg)](https://github.com/1968630284/longmen-kezhan/actions/workflows/ci.yml)
+
+[English](README.en.md) | **简体中文**
+
 > 一个人 + 两个 AI 助手，共用同一条时间线的本地协作客户端。
 > PowerShell 5.1 + WPF，零运行时依赖，单文件 177 KB 交付。
 
